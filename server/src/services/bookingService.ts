@@ -206,9 +206,37 @@ export async function getAllBookings(filters: AdminBookingFilters = {}) {
   const skip     = (page - 1) * pageSize;
 
   const where: Record<string, unknown> = {};
+
   if (filters.status)    where["status"]    = filters.status;
   if (filters.userId)    where["userId"]    = filters.userId;
   if (filters.serviceId) where["serviceId"] = filters.serviceId;
+
+  if (filters.dateFrom || filters.dateTo) {
+    const scheduledAt: Record<string, Date> = {};
+
+    if (filters.dateFrom) {
+      const from = new Date(filters.dateFrom);
+      from.setUTCHours(0, 0, 0, 0);
+      scheduledAt["gte"] = from;
+    }
+
+    if (filters.dateTo) {
+      const to = new Date(filters.dateTo);
+      to.setUTCHours(23, 59, 59, 999);
+      scheduledAt["lte"] = to;
+    }
+
+    where["scheduledAt"] = scheduledAt;
+  }
+
+  // ── Search filter on user name / service name ────────────────────────────
+  if (filters.search) {
+    where["OR"] = [
+      { user:    { name:  { contains: filters.search } } },
+      { service: { name:  { contains: filters.search } } },
+      { address: { contains: filters.search } },
+    ];
+  }
 
   const [total, bookings] = await Promise.all([
     db.booking.count({ where }),

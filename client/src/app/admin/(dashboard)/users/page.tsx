@@ -151,14 +151,10 @@ export default function UsersPage() {
         </p>
       </div>
 
-      {loading ? (
-        <div className="py-8 text-center text-sm text-muted-foreground">
-          Loading users…
-        </div>
-      ) : (
-        <DataTable
+      <DataTable
           columns={columns}
           data={users}
+          loading={loading}
           totalCount={meta.total}
           page={page}
           pageSize={pageSize}
@@ -166,7 +162,6 @@ export default function UsersPage() {
           onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
           filtersSlot={filtersSlot}
         />
-      )}
     </div>
   );
 }

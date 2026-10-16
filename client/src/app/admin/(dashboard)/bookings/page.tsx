@@ -205,14 +205,10 @@ export default function BookingPage() {
         </div>
       )}
 
-      {loading ? (
-        <div className="py-8 text-center text-sm text-muted-foreground">
-          Loading bookings…
-        </div>
-      ) : (
-        <DataTable
+      <DataTable
           columns={columns}
           data={bookings}
+          loading={loading}
           totalCount={meta.total}
           page={page}
           pageSize={pageSize}
@@ -220,7 +216,6 @@ export default function BookingPage() {
           onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
           filtersSlot={filtersSlot}
         />
-      )}
     </div>
   );
 }

@@ -103,6 +103,9 @@ export async function listAllBookingsHandler(req: Request, res: Response): Promi
       status:    req.query["status"]    as BookingStatus | undefined,
       userId:    req.query["userId"]    ? Number(req.query["userId"])   : undefined,
       serviceId: req.query["serviceId"] as string | undefined,
+      search:    req.query["search"]    as string | undefined,
+      dateFrom:  req.query["dateFrom"]  as string | undefined,
+      dateTo:    req.query["dateTo"]    as string | undefined,
       page:      req.query["page"]      ? Number(req.query["page"])     : 1,
       pageSize:  req.query["pageSize"]  ? Number(req.query["pageSize"]) : 20,
     };

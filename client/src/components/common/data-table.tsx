@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useTable, type ColumnDef, type RowData } from "@tanstack/react-table"
+import { Loader2 } from "lucide-react"
 
 import {
   Table,
@@ -16,14 +17,13 @@ import { features, type DataTableFeatures } from "./data-table-features"
 import { DataTablePagination } from "./data-table-pagination"
 
 interface DataTableProps<TData extends RowData> {
-  // Accept both the 3-param v9 form ColumnDef<DataTableFeatures, TData, any>
-  // and the 2-param form ColumnDef<TData, any> via the widened union below.
   columns: ColumnDef<DataTableFeatures, TData, unknown>[]
   data: TData[]
+  loading?: boolean
 
-  // Server-side pagination — pass these to take over pagination controls
+  // Server-side pagination
   totalCount?: number
-  page?: number          // 0-indexed
+  page?: number        // 0-indexed
   pageSize?: number
   onPageChange?: (page: number) => void
   onPageSizeChange?: (size: number) => void
@@ -35,6 +35,7 @@ interface DataTableProps<TData extends RowData> {
 export function DataTable<TData extends RowData>({
   columns,
   data,
+  loading = false,
   totalCount,
   page = 0,
   pageSize = 10,
@@ -49,7 +50,6 @@ export function DataTable<TData extends RowData>({
     features,
     data,
     columns,
-    // When server-side, tell TanStack the true total row count
     ...(isServerSide && {
       rowCount: totalCount,
       manualPagination: true,
@@ -105,9 +105,24 @@ export function DataTable<TData extends RowData>({
               </TableRow>
             ))}
           </TableHeader>
+
           <TableBody>
-            {table?.getRowModel()?.rows?.length ? (
-              table?.getRowModel()?.rows?.map((row) => (
+            {loading ? (
+              /* ── Spinner row — shown while fetching ── */
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-32 text-center"
+                >
+                  <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                    <Loader2 className="size-6 animate-spin text-blue-500" />
+                    <span className="text-sm">Loading…</span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows.length ? (
+              /* ── Data rows ── */
+              table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
@@ -120,10 +135,11 @@ export function DataTable<TData extends RowData>({
                 </TableRow>
               ))
             ) : (
+              /* ── Empty state ── */
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-32 text-center text-sm text-muted-foreground"
                 >
                   No results.
                 </TableCell>
@@ -135,7 +151,6 @@ export function DataTable<TData extends RowData>({
 
       <DataTablePagination
         table={table}
-        // Pass explicit server-side counts when available
         totalCount={isServerSide ? totalCount : undefined}
         serverPage={isServerSide ? page : undefined}
         serverPageSize={isServerSide ? pageSize : undefined}

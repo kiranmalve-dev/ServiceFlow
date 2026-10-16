@@ -177,14 +177,10 @@ export default function ServicesPage() {
           </Button>
         </div>
 
-        {loading ? (
-          <div className="py-8 text-center text-sm text-muted-foreground">
-            {t(msgs, "admin.loadingServices")}
-          </div>
-        ) : (
-          <DataTable
+        <DataTable
             columns={columns}
             data={services}
+            loading={loading}
             totalCount={meta.total}
             page={page}
             pageSize={pageSize}
@@ -192,7 +188,6 @@ export default function ServicesPage() {
             onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
             filtersSlot={filtersSlot}
           />
-        )}
       </div>
 
       <CreateServiceDialog
