@@ -1,0 +1,142 @@
+{
+  "navigation": {
+    "home": "בית",
+    "services": "שירותים",
+    "myBooking": "ההזמנות שלי",
+    "bookService": "הזמנת שירות",
+    "toggleLanguage": "English",
+    "skipToContent": "דלג לתוכן הראשי",
+    "myBookings": "ההזמנות שלי",
+    "signOut": "התנתק"
+  },
+  "catalog": {
+    "title": "השירותים שלנו",
+    "subtitle": "בחר שירות וקבע תור באינטרנט",
+    "bookNow": "הזמן עכשיו",
+    "from": "החל מ-",
+    "duration": "משך",
+    "minutes": "דק'",
+    "noServices": "אין שירותים זמינים כרגע."
+  },
+  "booking": {
+    "title": "הזמנת שירות",
+    "name": "שם מלא",
+    "namePlaceholder": "הכנס את שמך המלא",
+    "email": "כתובת אימייל",
+    "emailPlaceholder": "הכנס כתובת אימייל",
+    "phone": "מספר טלפון",
+    "phonePlaceholder": "הכנס מספר טלפון",
+    "date": "תאריך מועדף",
+    "time": "שעה מועדפת",
+    "service": "בחר שירות",
+    "servicePlaceholder": "-- בחר שירות --",
+    "notes": "הערות נוספות",
+    "notesPlaceholder": "בקשות מיוחדות או הערות",
+    "submit": "שליחת הזמנה",
+    "submitting": "שולח...",
+    "success": "ההזמנה שלך נשלחה בהצלחה!",
+    "required": "שדה חובה",
+    "invalidEmail": "נא להזין כתובת אימייל תקינה",
+    "invalidPhone": "נא להזין מספר טלפון תקין",
+    "cancel": "ביטול"
+  },
+  "myBooking": {
+    "title": "ההזמנות שלי",
+    "subtitle": "צפה ונהל את התורים הקרובים שלך",
+    "status": {
+      "confirmed": "מאושר",
+      "pending": "ממתין",
+      "cancelled": "בוטל"
+    },
+    "noBookings": "אין לך הזמנות עדיין.",
+    "browseServices": "עיין בשירותים",
+    "date": "תאריך",
+    "time": "שעה",
+    "service": "שירות",
+    "cancel": "בטל הזמנה",
+    "refresh": "רענן הזמנות",
+    "retry": "נסה שוב",
+    "failedToLoad": "נכשל בטעינת הזמנות. אנא נסה שוב."
+  },
+  "login": {
+    "login": "התחברות",
+    "signIn": "התחבר",
+    "signingIn": "מתחבר…",
+    "emailAddress": "כתובת אימייל",
+    "password": "סיסמה",
+    "showPassword": "הצג סיסמה",
+    "hidePassword": "הסתר סיסמה"
+  },
+  "errors": {
+    "required": "שדה חובה",
+    "invalidEmail": "נא להזין כתובת אימייל תקינה",
+    "invalidPhone": "נא להזין מספר טלפון תקין",
+    "minLength": "חייב להכיל לפחות {min} תווים",
+    "fillAllFields": "אנא מלא את כל השדות.",
+    "invalidCredentials": "פרטי ההתחברות שגויים. אנא נסה שוב."
+  },
+  "hero": {
+    "badge": "הזמנה מקוונת",
+    "title": "הזמן את ה",
+    "titleHighlight": "שירות הבא שלך מקוון",
+    "subtitle": "עיין בשירותים המקצועיים שלנו, בחר מועד, ואשר בשניות — ללא צורך בשיחות טלפון.",
+    "browseServices": "עיין בשירותים"
+  },
+  "services": {
+    "title": "השירותים שלנו",
+    "subtitle": "בחר ממגוון השירותים המקצועיים שלנו והזמן מיד.",
+    "loading": "טוען שירותים..."
+  },
+  "serviceDetail": {
+    "backToServices": "חזור לשירותים",
+    "serviceDetails": "פרטי שירות",
+    "aboutService": "אודות שירות זה",
+    "price": "מחיר",
+    "duration": "משך",
+    "minutes": "דק'",
+    "currentlyAvailable": "זמין להזמנה כעת",
+    "notAvailable": "לא זמין כרגע",
+    "notAvailableTitle": "לא זמין",
+    "notAvailableMessage": "שירות זה אינו זמין כרגע. אנא בדוק שוב מאוחר יותר.",
+    "browseOtherServices": "עיין בשירותים אחרים"
+  },
+  "admin": {
+    "portal": "פורטל מנהלים",
+    "signInToManage": "התחבר לניהול ServiceFlow",
+    "services": "שירותים",
+    "servicesSubtitle": "נהל את השירותים, המחירים והזמינות שלך.",
+    "newService": "שירות חדש",
+    "bookings": "הזמנות",
+    "users": "ניהול משתמשים",
+    "usersSubtitle": "נהל את המשתמשים, המחירים והזמינות שלך.",
+    "loadingServices": "טוען שירותים...",
+    "deleteConfirm": "האם אתה בטוח שברצונך למחוק את",
+    "unableToDelete": "לא ניתן למחוק את השירות.",
+    "status": {
+      "pending": "ממתין",
+      "confirmed": "מאושר",
+      "completed": "הושלם",
+      "cancelled": "בוטל"
+    },
+    "filters": {
+      "search": "חיפוש",
+      "status": "סטטוס",
+      "dateFrom": "תאריך התחלה",
+      "dateTo": "תאריך סיום",
+      "allStatuses": "כל הסטטוסים"
+    },
+    "pagination": {
+      "pageOf": "עמוד",
+      "of": "מתוך",
+      "total": "סה",
+      "firstPage": "עמוד ראשון",
+      "previousPage": "עמוד קודם",
+      "nextPage": "עמוד הבא",
+      "lastPage": "עמוד אחרון"
+    },
+    "error": {
+      "failedToLoad": "נכשל בטעינת הזמנות.",
+      "retry": "נסה שוב"
+    }
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "navigation": {
+    "home": "Home",
+    "services": "Services",
+    "myBooking": "My Booking",
+    "bookService": "Book a Service",
+    "toggleLanguage": "עברית",
+    "skipToContent": "Skip to main content",
+    "myBookings": "My Bookings",
+    "signOut": "Sign out"
+  },
+  "catalog": {
+    "title": "Our Services",
+    "subtitle": "Choose a service and book your appointment online",
+    "bookNow": "Book Now",
+    "from": "From",
+    "duration": "Duration",
+    "minutes": "min",
+    "noServices": "No services available at this time."
+  },
+  "booking": {
+    "title": "Book a Service",
+    "name": "Full Name",
+    "namePlaceholder": "Enter your full name",
+    "email": "Email Address",
+    "emailPlaceholder": "Enter your email address",
+    "phone": "Phone Number",
+    "phonePlaceholder": "Enter your phone number",
+    "date": "Preferred Date",
+    "time": "Preferred Time",
+    "service": "Select Service",
+    "servicePlaceholder": "-- Select a service --",
+    "notes": "Additional Notes",
+    "notesPlaceholder": "Any special requests or notes",
+    "submit": "Submit Booking",
+    "submitting": "Submitting...",
+    "success": "Your booking has been submitted successfully!",
+    "required": "This field is required",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidPhone": "Please enter a valid phone number",
+    "cancel": "Cancel"
+  },
+  "login": {
+    "login": "Login",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "emailAddress": "Email address",
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
+  "myBooking": {
+    "title": "My Bookings",
+    "subtitle": "View and manage your upcoming appointments",
+    "status": {
+      "confirmed": "Confirmed",
+      "pending": "Pending",
+      "cancelled": "Cancelled"
+    },
+    "noBookings": "You have no bookings yet.",
+    "browseServices": "Browse Services",
+    "date": "Date",
+    "time": "Time",
+    "service": "Service",
+    "cancel": "Cancel Booking",
+    "refresh": "Refresh bookings",
+    "retry": "Retry",
+    "failedToLoad": "Failed to load bookings. Please try again."
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidPhone": "Please enter a valid phone number",
+    "minLength": "Must be at least {min} characters",
+    "fillAllFields": "Please fill in all fields.",
+    "invalidCredentials": "Invalid credentials. Please try again."
+  },
+  "hero": {
+    "badge": "Online Booking",
+    "title": "Book Your Next",
+    "titleHighlight": "Service Online",
+    "subtitle": "Browse our professional services, pick your slot, and confirm in seconds — no phone calls needed.",
+    "browseServices": "Browse Services"
+  },
+  "services": {
+    "title": "Our Services",
+    "subtitle": "Choose from our range of professional services and book instantly.",
+    "loading": "Loading services..."
+  },
+  "serviceDetail": {
+    "backToServices": "Back to services",
+    "serviceDetails": "Service Details",
+    "aboutService": "About this service",
+    "price": "Price",
+    "duration": "Duration",
+    "minutes": "min",
+    "currentlyAvailable": "Currently available for booking",
+    "notAvailable": "Not currently available",
+    "notAvailableTitle": "Not Available",
+    "notAvailableMessage": "This service is currently unavailable. Please check back later.",
+    "browseOtherServices": "Browse other services"
+  },
+  "admin": {
+    "portal": "Admin Portal",
+    "signInToManage": "Sign in to manage ServiceFlow",
+    "services": "Services",
+    "servicesSubtitle": "Manage your services, pricing, and availability.",
+    "newService": "New Service",
+    "bookings": "Bookings",
+    "users": "User Management",
+    "usersSubtitle": "Manage your Users, pricing, and availability.",
+    "loadingServices": "Loading services...",
+    "deleteConfirm": "Are you sure you want to delete",
+    "unableToDelete": "Unable to delete service.",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "filters": {
+      "search": "Search",
+      "status": "Status",
+      "dateFrom": "Date From",
+      "dateTo": "Date To",
+      "allStatuses": "All Statuses"
+    },
+    "pagination": {
+      "pageOf": "Page",
+      "of": "of",
+      "total": "total",
+      "firstPage": "First page",
+      "previousPage": "Previous page",
+      "nextPage": "Next page",
+      "lastPage": "Last page"
+    },
+    "error": {
+      "failedToLoad": "Failed to load bookings.",
+      "retry": "Retry"
+    }
+  }
+}
