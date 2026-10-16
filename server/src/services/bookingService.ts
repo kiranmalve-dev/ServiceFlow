@@ -27,28 +27,7 @@ const bookingSelect = {
   },
 };
 
-// ── Customer operations ───────────────────────────────────────────────────────
 
-/**
- * POST /api/bookings
- *
- * Creates a booking after checking two conflict rules:
- *
- *  Rule 1 — Per-user duplicate:
- *    The same customer cannot have an active booking for the same service
- *    whose time window overlaps the requested slot.
- *    "Active" means status NOT IN (CANCELLED, COMPLETED).
- *
- *  Rule 2 — Per-service slot:
- *    No two active bookings for the same service can overlap in time.
- *    Overlap = requested start is before an existing end
- *              AND existing start is before requested end.
- *    (This assumes one provider per service / single-resource scheduling.)
- *
- * Overlap formula (all times in UTC):
- *   conflictStart < requestedEnd  AND  requestedStart < conflictEnd
- *   where End = Start + duration (minutes).
- */
 export async function createBooking(
   userId: number,
   input: { serviceId: string; scheduledAt: string; address: string; notes?: string }
@@ -61,29 +40,15 @@ export async function createBooking(
   const requestedStart = new Date(input.scheduledAt);
   const durationMs     = service.duration * 60 * 1000;
   const requestedEnd   = new Date(requestedStart.getTime() + durationMs);
-
-  // Non-terminal statuses that block a slot
   const activeStatuses: BookingStatus[] = ["PENDING", "CONFIRMED"];
 
-  // 2. Rule 1 — same user + same service + overlapping window
   const userConflict = await db.booking.findFirst({
     where: {
       userId,
       serviceId: input.serviceId,
       status:    { in: activeStatuses },
-      // Overlap: existing.scheduledAt < requestedEnd
-      //      AND requestedStart      < existing.scheduledAt + duration
-      // We express the second half by checking scheduledAt < requestedEnd
-      // and handle the duration offset in the post-query filter below, OR
-      // we use a raw date range query that SQLite supports via gte/lt.
       scheduledAt: {
-        // existing slot starts before our slot ends …
         lt: requestedEnd,
-        // … and existing slot ends after our slot starts
-        // existing end = scheduledAt + duration → we cannot express this
-        // in Prisma without raw SQL for SQLite, so we use a safe window:
-        // fetch any booking whose start falls within ±duration of ours
-        // and then do an exact overlap check in JS.
         gte: new Date(requestedStart.getTime() - durationMs),
       },
     },
@@ -212,18 +177,20 @@ export async function getAllBookings(filters: AdminBookingFilters = {}) {
   if (filters.serviceId) where["serviceId"] = filters.serviceId;
 
   if (filters.dateFrom || filters.dateTo) {
-    const scheduledAt: Record<string, Date> = {};
+    // SQLite stores DateTime as ISO-8601 strings. Prisma on SQLite serialises
+    // Date objects inconsistently, so we build boundary strings directly and
+    // let SQLite compare them lexicographically — ISO-8601 strings sort
+    // correctly as plain text, so gte/lte comparisons work as expected.
+    const scheduledAt: Record<string, string> = {};
 
     if (filters.dateFrom) {
-      const from = new Date(filters.dateFrom);
-      from.setUTCHours(0, 0, 0, 0);
-      scheduledAt["gte"] = from;
+      // Start of day UTC → "2026-10-14T00:00:00.000Z"
+      scheduledAt["gte"] = `${filters.dateFrom}T00:00:00.000Z`;
     }
 
     if (filters.dateTo) {
-      const to = new Date(filters.dateTo);
-      to.setUTCHours(23, 59, 59, 999);
-      scheduledAt["lte"] = to;
+      // End of day UTC → "2026-10-14T23:59:59.999Z"
+      scheduledAt["lte"] = `${filters.dateTo}T23:59:59.999Z`;
     }
 
     where["scheduledAt"] = scheduledAt;
