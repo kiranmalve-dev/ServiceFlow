@@ -48,7 +48,6 @@ export async function login(req: Request, res: Response): Promise<void> {
 }
 
 export function logout(req: Request, res: Response): void {
-  // Clear whichever portal cookie is present in this request.
   const cookieOptions = {
     httpOnly: true,
     secure: IS_PRODUCTION,
@@ -56,8 +55,6 @@ export function logout(req: Request, res: Response): void {
     path: "/",
   };
 
-  // Clear both so a single /logout call cleans up regardless of which portal
-  // the client is logged into (e.g. a browser with two tabs).
   if (req.cookies?.["cus_token"]) res.clearCookie("cus_token", cookieOptions);
   if (req.cookies?.["adm_token"]) res.clearCookie("adm_token", cookieOptions);
 
