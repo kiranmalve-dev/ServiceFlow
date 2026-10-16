@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import BookingForm from "@/src/components/features/serviceBokingForm";
 import ServiceDetailContent from "@/src/components/features/serviceDetailContent";
-import Header from "@/src/components/common/header";
 
-// ── Type matching the actual API response ─────────────────────────────────────
 interface Service {
   id: string;
   name: string;
@@ -17,30 +14,28 @@ interface Service {
   updatedAt: string;
 }
 
-// ── Category styles — matches home page service cards ────────────────────────
 const CATEGORY_PILL: Record<string, string> = {
-  Cleaning:    "bg-teal-100   text-teal-700",
-  Beauty:      "bg-pink-100   text-pink-700",
-  Fitness:     "bg-orange-100 text-orange-700",
-  Wellness:    "bg-purple-100 text-purple-700",
-  Plumbing:    "bg-blue-100   text-blue-700",
-  Electrical:  "bg-yellow-100 text-yellow-700",
-  HVAC:        "bg-cyan-100   text-cyan-700",
-  Gardening:   "bg-green-100  text-green-700",
+  Cleaning: "bg-teal-100   text-teal-700",
+  Beauty: "bg-pink-100   text-pink-700",
+  Fitness: "bg-orange-100 text-orange-700",
+  Wellness: "bg-purple-100 text-purple-700",
+  Plumbing: "bg-blue-100   text-blue-700",
+  Electrical: "bg-yellow-100 text-yellow-700",
+  HVAC: "bg-cyan-100   text-cyan-700",
+  Gardening: "bg-green-100  text-green-700",
 };
 
 const CATEGORY_BAR: Record<string, string> = {
-  Cleaning:    "bg-teal-400",
-  Beauty:      "bg-pink-400",
-  Fitness:     "bg-orange-400",
-  Wellness:    "bg-purple-400",
-  Plumbing:    "bg-blue-400",
-  Electrical:  "bg-yellow-400",
-  HVAC:        "bg-cyan-400",
-  Gardening:   "bg-green-400",
+  Cleaning: "bg-teal-400",
+  Beauty: "bg-pink-400",
+  Fitness: "bg-orange-400",
+  Wellness: "bg-purple-400",
+  Plumbing: "bg-blue-400",
+  Electrical: "bg-yellow-400",
+  HVAC: "bg-cyan-400",
+  Gardening: "bg-green-400",
 };
 
-// ── Dynamic metadata ──────────────────────────────────────────────────────────
 export async function generateMetadata({
   params,
 }: {
@@ -54,7 +49,6 @@ export async function generateMetadata({
   };
 }
 
-// ── Server-side fetch ─────────────────────────────────────────────────────────
 async function getService(id: string): Promise<{
   service: Service | null;
   error: string | null;
@@ -71,13 +65,11 @@ async function getService(id: string): Promise<{
         error: `Failed to load service (${res.status} ${res.statusText})`,
       };
     }
-
     const json = await res.json();
     const service: Service = json.data;
-
     return { service, error: null };
   } catch (err) {
-    console.error("[ServiceDetailPage] fetch error:", err);
+    console.log(err);
     return {
       service: null,
       error: "Unable to connect to the server.",
@@ -85,7 +77,7 @@ async function getService(id: string): Promise<{
   }
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+
 export default async function ServiceDetailPage({
   params,
 }: {
@@ -98,24 +90,21 @@ export default async function ServiceDetailPage({
     notFound();
   }
 
-  const pillClass  = CATEGORY_PILL[service.category] ?? "bg-zinc-100 text-zinc-600";
-  const barClass   = CATEGORY_BAR[service.category]  ?? "bg-zinc-300";
+  const pillClass = CATEGORY_PILL[service.category] ?? "bg-zinc-100 text-zinc-600";
+  const barClass = CATEGORY_BAR[service.category] ?? "bg-zinc-300";
 
   return (
-    <>
-    <Header />
     <main
       id="main-content"
       className="flex-1 bg-gradient-to-br from-zinc-50 to-blue-50 py-10 px-4"
     >
-      <div className="max-w-6xl mx-auto">
-        <ServiceDetailContent
-          service={service}
-          pillClass={pillClass}
-          barClass={barClass}
-        />
-      </div>
-    </main>
-    </>
+        <div className="max-w-6xl mx-auto">
+          <ServiceDetailContent
+            service={service}
+            pillClass={pillClass}
+            barClass={barClass}
+          />
+        </div>
+      </main>
   );
 }

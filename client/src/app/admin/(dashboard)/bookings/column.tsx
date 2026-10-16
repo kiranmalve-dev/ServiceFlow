@@ -1,6 +1,7 @@
 "use client";
 
-import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
+import { type DataTableFeatures } from "@/src/components/common/data-table-features";
 import { Booking, BookingStatus } from "./type";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { type Messages, t } from "@/src/i18";
@@ -27,7 +28,7 @@ interface BookingColumnsProps {
 export function getBookingColumns({
   onStatusChange,
   msgs,
-}: BookingColumnsProps): ColumnDef<TableFeatures,Booking, unknown>[] {
+}: BookingColumnsProps): ColumnDef<DataTableFeatures, Booking, unknown>[] {
   return [
     {
       accessorKey: "user.name",

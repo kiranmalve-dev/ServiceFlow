@@ -1,16 +1,5 @@
-/**
- * ServicesList.test.tsx
- *
- * Tests for the client-side ServicesList component:
- *  - initial render
- *  - search filter
- *  - category filter pills
- *  - sort behaviour (price low → high is the default)
- *  - empty-state when filters produce no results
- *  - load-more pagination
- */
 
-import React from "react";
+
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ServicesList, { type Service } from "../serviceList";

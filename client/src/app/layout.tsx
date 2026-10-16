@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Sans_Hebrew } from "next/font/google";
 import "./globals.css";
-import Header from "../components/common/header";
 import LocaleProvider from "../components/common/LocaleProvider";
 
 const geistSans = Geist({
@@ -37,7 +36,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${notoSansHebrew.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
-        <LocaleProvider />
+        {/* <LocaleProvider /> */}
         <main id="main-content" className="flex-1">
           {children}
         </main>

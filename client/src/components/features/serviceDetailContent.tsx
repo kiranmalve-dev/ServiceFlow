@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Tag, CheckCircle, XCircle } from "lucide-react";
+import {  Tag, CheckCircle, XCircle } from "lucide-react";
 import { useLocaleStore } from "../../store/localeStore";
 import { t } from "../../i18";
 import BookingForm from "./serviceBokingForm";
@@ -50,25 +50,8 @@ export default function ServiceDetailContent({
 
   return (
     <>
-      {/* <a
-        href="/"
-        className="inline-flex items-center gap-1.5 text-zinc-500 hover:text-blue-600
-          text-sm mb-8 transition-colors font-medium
-          focus:outline-2 focus:outline-offset-2 focus:outline-blue-600 rounded"
-      >
-        <svg
-          aria-hidden="true"
-          className="w-4 h-4"
-          fill="none" stroke="currentColor" viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-        {t(msgs, "serviceDetail.backToServices")}
-      </a> */}
-
       <div className="grid lg:grid-cols-2 gap-8 items-start">
-
-        <div>
+       <div>
           <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-4">
             {t(msgs, "serviceDetail.serviceDetails")}
           </p>

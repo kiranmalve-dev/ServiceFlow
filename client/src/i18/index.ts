@@ -12,17 +12,12 @@ export function getDirection(locale: Locale): Direction {
   return locale === "he" ? "rtl" : "ltr";
 }
 
-/**
- * Simple nested key accessor.
- * Usage: t(msgs, "booking.name")  or  t(msgs, "navigation.home")
- */
 export function t(
   msgs: Messages,
   key: string,
   vars?: Record<string, string | number>
 ): string {
   const parts = key.split(".");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let value: any = msgs;
   for (const part of parts) {
     value = value?.[part];

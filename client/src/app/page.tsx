@@ -13,7 +13,6 @@ export default async function HomePage ({
   return (
     <>
       <Header />
-
       <section
         aria-labelledby="hero-heading"
         className="relative bg-gradient-to-br from-blue-600 to-blue-800 text-white overflow-hidden"
@@ -24,9 +23,7 @@ export default async function HomePage ({
         />
         <HeroSection />
       </section>
-
       <StatsStrip />
-
       <section
         id="services"
         aria-labelledby="services-heading"

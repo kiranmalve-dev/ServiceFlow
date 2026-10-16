@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, Suspense } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Menu, X, User, LogOut, ChevronDown } from "lucide-react";
 import { useLocaleStore } from "../../store/localeStore";
 import { useCustomerAuthStore } from "../../store/customerAuthStore";
@@ -10,11 +10,15 @@ import { t } from "../../i18";
 import LoginDialog from "../features/loginDialog";
 import { logout } from "@/src/lib/auth";
 
-export default function Header() {
+// ─── Inner component ─────────────────────────────────────────────────────────
+// All hooks that are dynamic at runtime (usePathname, useSearchParams, etc.)
+// live here. This component is rendered inside <Suspense> so Next.js can
+// prerender the static shell of any SSG/ISR page without being blocked.
+function HeaderInner() {
+  const pathname = usePathname();
   const { msgs, dir, toggleLocale, locale } = useLocaleStore();
   const { isAuthenticated, user, clearAuth } = useCustomerAuthStore();
-  const pathname = usePathname();
-  const router = useRouter();
+
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
@@ -23,7 +27,10 @@ export default function Header() {
 
   React.useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(e.target as Node)
+      ) {
         setUserMenuOpen(false);
       }
     }
@@ -47,13 +54,12 @@ export default function Header() {
       clearAuth();
       setUserMenuOpen(false);
       if (res?.success) {
-        window.location.href = "/"
+        window.location.href = "/";
       }
     } catch (error) {
-      console.log("error", error)
+      console.log("error", error);
     }
   }
-
 
   return (
     <>
@@ -93,9 +99,10 @@ export default function Header() {
                     aria-current={isActive(href) ? "page" : undefined}
                     className={`px-3 py-2 rounded text-sm font-medium transition-colors
                       focus:outline-2 focus:outline-offset-2 focus:outline-blue-600
-                      ${isActive(href)
-                        ? "bg-blue-50 text-blue-700"
-                        : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
+                      ${
+                        isActive(href)
+                          ? "bg-blue-50 text-blue-700"
+                          : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
                       }`}
                   >
                     {t(msgs, labelKey)}
@@ -105,7 +112,6 @@ export default function Header() {
             </ul>
 
             <div className="flex items-center gap-2">
-
               <button
                 type="button"
                 onClick={toggleLocale}
@@ -151,15 +157,16 @@ export default function Header() {
                     >
                       <div className="px-4 py-2 border-b border-zinc-100">
                         <p className="text-xs text-zinc-500">Signed in as</p>
-                        <p className="text-sm font-medium text-zinc-900 truncate">{user.email}</p>
+                        <p className="text-sm font-medium text-zinc-900 truncate">
+                          {user.email}
+                        </p>
                       </div>
                       <Link
                         href="/customer/my-booking"
                         role="menuitem"
                         onClick={() => setUserMenuOpen(false)}
                         className="flex items-center gap-2 px-4 py-2 text-sm text-zinc-700
-                          hover:bg-zinc-50 transition-colors
-                          focus:outline-2 focus:outline-blue-600"
+                          hover:bg-zinc-50 transition-colors focus:outline-2 focus:outline-blue-600"
                       >
                         <User size={14} aria-hidden="true" />
                         {t(msgs, "navigation.myBookings")}
@@ -169,8 +176,7 @@ export default function Header() {
                         role="menuitem"
                         onClick={handleSignOut}
                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600
-                          hover:bg-red-50 transition-colors
-                          focus:outline-2 focus:outline-blue-600"
+                          hover:bg-red-50 transition-colors focus:outline-2 focus:outline-blue-600"
                       >
                         <LogOut size={14} aria-hidden="true" />
                         {t(msgs, "navigation.signOut")}
@@ -183,8 +189,7 @@ export default function Header() {
                   type="button"
                   onClick={() => setLoginOpen(true)}
                   className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg
-                    bg-blue-600 text-white text-sm font-medium
-                    hover:bg-blue-700 transition-colors
+                    bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors
                     focus:outline-2 focus:outline-offset-2 focus:outline-blue-800"
                 >
                   {t(msgs, "login.signIn")}
@@ -222,9 +227,10 @@ export default function Header() {
                       onClick={() => setMobileOpen(false)}
                       className={`block px-3 py-2 rounded text-sm font-medium transition-colors
                         focus:outline-2 focus:outline-offset-2 focus:outline-blue-600
-                        ${isActive(href)
-                          ? "bg-blue-50 text-blue-700"
-                          : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
+                        ${
+                          isActive(href)
+                            ? "bg-blue-50 text-blue-700"
+                            : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
                         }`}
                     >
                       {t(msgs, labelKey)}
@@ -236,7 +242,10 @@ export default function Header() {
               <div className="mt-3 px-1 flex flex-col gap-2">
                 <button
                   type="button"
-                  onClick={() => { toggleLocale(); setMobileOpen(false); }}
+                  onClick={() => {
+                    toggleLocale();
+                    setMobileOpen(false);
+                  }}
                   aria-pressed={locale === "he"}
                   aria-label={`Switch to ${locale === "en" ? "Hebrew" : "English"}`}
                   className="w-full text-start px-3 py-2 rounded border border-zinc-300
@@ -254,13 +263,18 @@ export default function Header() {
                         {user.name.charAt(0)}
                       </span>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-zinc-900 truncate">{user.name}</p>
+                        <p className="text-sm font-medium text-zinc-900 truncate">
+                          {user.name}
+                        </p>
                         <p className="text-xs text-zinc-500 truncate">{user.email}</p>
                       </div>
                     </div>
                     <button
                       type="button"
-                      onClick={() => { handleSignOut(); setMobileOpen(false); }}
+                      onClick={() => {
+                        handleSignOut();
+                        setMobileOpen(false);
+                      }}
                       className="flex items-center gap-2 px-3 py-2 rounded text-sm font-medium
                         text-red-600 hover:bg-red-50 transition-colors
                         focus:outline-2 focus:outline-offset-2 focus:outline-red-600"
@@ -272,7 +286,10 @@ export default function Header() {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => { setMobileOpen(false); setLoginOpen(true); }}
+                    onClick={() => {
+                      setMobileOpen(false);
+                      setLoginOpen(true);
+                    }}
                     className="block w-full px-3 py-2 rounded bg-blue-600 text-white text-sm font-medium
                       text-center hover:bg-blue-700 transition-colors
                       focus:outline-2 focus:outline-offset-2 focus:outline-blue-800"
@@ -288,5 +305,22 @@ export default function Header() {
 
       <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
     </>
+  );
+}
+
+// ─── Public export ────────────────────────────────────────────────────────────
+// Thin shell that wraps HeaderInner in <Suspense>.
+// This is what makes usePathname() safe on SSG/ISR Server Component pages
+// (e.g. /customer/services/[id]): Next.js prerenders the static fallback
+// and streams HeaderInner in once the client-side route value is available.
+export default function Header() {
+  return (
+    <Suspense
+      fallback={
+        <div className="sticky top-0 z-40 h-16 bg-white border-b border-zinc-200 shadow-sm" />
+      }
+    >
+      <HeaderInner />
+    </Suspense>
   );
 }

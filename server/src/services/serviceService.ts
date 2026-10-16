@@ -58,7 +58,7 @@ export async function getAllServices(filters: ServiceFilters = {}) {
       { category:    { contains: filters.search } },
     ];
   }
-
+  
   const [total, services] = await Promise.all([
     db.service.count({ where }),
     db.service.findMany({

@@ -1,11 +1,3 @@
-/**
- * BookButton.test.tsx
- *
- * Tests for the BookButton (serviceRedirect) component:
- *  - authenticated users get a direct <Link> to the service page
- *  - unauthenticated users get a button that opens the LoginDialog
- *  - LoginDialog closes after successful login and onSuccess fires
- */
 
 import React from "react";
 import { render, screen } from "@testing-library/react";

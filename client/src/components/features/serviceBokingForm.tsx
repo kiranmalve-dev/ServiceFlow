@@ -172,7 +172,7 @@ export default function BookingForm({ service }: Props) {
                     setCalendarOpen(false);
                   }}
                   disabled={(date) => isBefore(date, today)}
-                  initialFocus
+                  // initialFocus
                 />
               </div>
             )}

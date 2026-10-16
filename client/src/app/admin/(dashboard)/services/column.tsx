@@ -1,6 +1,7 @@
 "use client";
 
-import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
+import { type DataTableFeatures } from "@/src/components/common/data-table-features";
 import { Service } from "./type";
 import { Button } from "@/src/components/ui/button";
 import { Badge } from "@/src/components/ui/badge";
@@ -13,16 +14,12 @@ interface ServiceColumnsProps {
 export const getServiceColumns = ({
   onEdit,
   onDelete,
-}: ServiceColumnsProps): ColumnDef<TableFeatures,
-  Service,
-  unknown>[] => [
+}: ServiceColumnsProps): ColumnDef<DataTableFeatures, Service, unknown>[] => [
   {
     accessorKey: "name",
     header: "Service Name",
     cell: ({ row }) => (
-      <span className="font-medium">
-        {row.original.name}
-      </span>
+      <span className="font-medium">{row.original.name}</span>
     ),
   },
   {
@@ -60,9 +57,7 @@ export const getServiceColumns = ({
     accessorKey: "isActive",
     header: "Status",
     cell: ({ row }) => (
-      <Badge
-        variant={row.original.isActive ? "default" : "secondary"}
-      >
+      <Badge variant={row.original.isActive ? "default" : "secondary"}>
         {row.original.isActive ? "Active" : "Inactive"}
       </Badge>
     ),
@@ -85,7 +80,6 @@ export const getServiceColumns = ({
         >
           Edit
         </Button>
-
         <Button
           variant="destructive"
           size="sm"

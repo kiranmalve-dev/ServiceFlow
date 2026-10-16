@@ -1,17 +1,14 @@
-
-export interface Service {
-  id: string;
+export interface User {
+  id: number;
   name: string;
-  category: string;
-  description: string;
-  price: number;
-  duration: number;
+  email: string;
+  phone?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface ServicePagination {
+export interface UserPagination {
   total: number;
   page: number;
   pageSize: number;

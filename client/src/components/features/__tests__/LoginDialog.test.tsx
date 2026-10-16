@@ -1,16 +1,3 @@
-/**
- * LoginDialog.test.tsx
- *
- * Tests for the LoginDialog component:
- *  - renders form fields when open
- *  - hides when closed
- *  - client-side validation (empty submit, invalid email)
- *  - password visibility toggle
- *  - successful login flow: calls setAuth + onSuccess
- *  - API error display
- *  - auto-closes when already authenticated
- *  - resets form state when re-opened
- */
 
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";

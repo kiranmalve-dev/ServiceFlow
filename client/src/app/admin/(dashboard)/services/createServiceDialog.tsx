@@ -31,8 +31,7 @@ const CATEGORIES = [
   "Gardening",
 ] as const;
 
-
-const createServiceSchema = z.object({
+const serviceSchema = z.object({
   name: z
     .string()
     .min(2, "Name must be at least 2 characters")
@@ -45,24 +44,30 @@ const createServiceSchema = z.object({
     .min(5, "Description must be at least 5 characters")
     .max(500, "Description is too long"),
   price: z
-    .number("Price must be a number")
+    .number({ invalid_type_error: "Price must be a number" })
     .int("Price must be a whole number")
     .positive("Price must be greater than 0"),
   duration: z
-    .number("Duration must be a number")
+    .number({ invalid_type_error: "Duration must be a number" })
     .int("Duration must be a whole number")
     .positive("Duration must be greater than 0"),
+  isActive: z.boolean(),
 });
 
-type CreateServiceValues = z.infer<typeof createServiceSchema>;
+type ServiceFormValues = z.infer<typeof serviceSchema>;
 
 interface CreateServiceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Called after the service is successfully created so the table can refresh */
-  onCreated: (service: Service) => void;
+  /** When provided the dialog operates in edit mode */
+  service?: Service | null;
+  /** Called after a new service is successfully created */
+  onCreated?: (service: Service) => void;
+  /** Called after an existing service is successfully updated */
+  onUpdated?: (service: Service) => void;
 }
 
+// ─── Reusable field wrapper ───────────────────────────────────────────────────
 function Field({
   label,
   htmlFor,
@@ -78,10 +83,7 @@ function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <label
-        htmlFor={htmlFor}
-        className="text-sm font-medium text-foreground"
-      >
+      <label htmlFor={htmlFor} className="text-sm font-medium text-foreground">
         {label}
         {required && <span className="text-destructive ml-0.5">*</span>}
       </label>
@@ -95,11 +97,15 @@ function Field({
   );
 }
 
+// ─── Dialog ───────────────────────────────────────────────────────────────────
 export default function CreateServiceDialog({
   open,
   onOpenChange,
+  service = null,
   onCreated,
+  onUpdated,
 }: CreateServiceDialogProps) {
+  const isEditMode = service !== null;
   const [apiError, setApiError] = React.useState<string | null>(null);
 
   const {
@@ -109,64 +115,115 @@ export default function CreateServiceDialog({
     watch,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<CreateServiceValues>({
-    resolver: zodResolver(createServiceSchema),
+  } = useForm<ServiceFormValues>({
+    resolver: zodResolver(serviceSchema),
     defaultValues: {
       name: "",
       category: undefined,
       description: "",
       price: undefined,
       duration: undefined,
+      isActive: true,
     },
   });
 
-  // Reset state when dialog closes
+  // Populate form whenever the dialog opens:
+  // — edit mode  → fill with existing service values
+  // — create mode → blank slate
   React.useEffect(() => {
-    if (!open) {
-      reset();
+    if (open) {
+      if (service) {
+        reset({
+          name:        service.name,
+          category:    service.category as (typeof CATEGORIES)[number],
+          description: service.description,
+          price:       service.price,
+          duration:    service.duration,
+          isActive:    service.isActive,
+        });
+      } else {
+        reset({
+          name: "",
+          category: undefined,
+          description: "",
+          price: undefined,
+          duration: undefined,
+          isActive: true,
+        });
+      }
       setApiError(null);
     }
-  }, [open, reset]);
+  }, [open, service, reset]);
 
-  async function onSubmit(values: CreateServiceValues) {
+  async function onSubmit(values: ServiceFormValues) {
     setApiError(null);
     try {
-      // POST /admin/services — axios interceptor unwraps response.data
-      const response = (await api.post("/admin/services", {
+      const payload = {
         name:        values.name.trim(),
         category:    values.category,
         description: values.description.trim(),
         price:       values.price,
         duration:    values.duration,
-      })) as { success: boolean; message: string; data: Service };
+        isActive:    values.isActive,
+      };
 
-      onCreated(response.data);
+      if (isEditMode && service) {
+        // ── Edit ──────────────────────────────────────────────────────────
+        const response = (await api.put(`/admin/services/${service.id}`, payload)) as {
+          success: boolean;
+          message: string;
+          data: Service;
+        };
+        onUpdated?.(response.data);
+      } else {
+        // ── Create ────────────────────────────────────────────────────────
+        const response = (await api.post("/admin/services", payload)) as {
+          success: boolean;
+          message: string;
+          data: Service;
+        };
+        onCreated?.(response.data);
+      }
+
       onOpenChange(false);
     } catch (err) {
       const e = err as { message?: string };
-      setApiError(e?.message ?? "Failed to create service. Please try again.");
+      setApiError(
+        e?.message ??
+          `Failed to ${isEditMode ? "update" : "create"} service. Please try again.`
+      );
     }
   }
 
   const selectedCategory = watch("category");
+  const isActiveValue    = watch("isActive");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg p-0 overflow-hidden gap-0">
+
+        {/* Header */}
         <div className="px-6 pt-6 pb-4">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold">
-              Create New Service
+              {isEditMode ? "Edit Service" : "Create New Service"}
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              Fill in the details below. All fields marked{" "}
-              <span className="text-destructive font-medium">*</span> are required.
+              {isEditMode
+                ? "Update the details below and save your changes."
+                : "Fill in the details below. All fields marked "}
+              {!isEditMode && (
+                <>
+                  <span className="text-destructive font-medium">*</span> are required.
+                </>
+              )}
             </DialogDescription>
           </DialogHeader>
         </div>
 
+        {/* Form body */}
         <form
-          id="create-service-form"
+          id="service-form"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
           className="px-6 space-y-4 overflow-y-auto max-h-[60vh]"
@@ -284,6 +341,38 @@ export default function CreateServiceDialog({
             </Field>
           </div>
 
+          {/* Status toggle — only shown in edit mode */}
+          {isEditMode && (
+            <Field label="Status" htmlFor="svc-isActive">
+              <div className="flex items-center gap-3 pt-0.5">
+                <button
+                  id="svc-isActive"
+                  type="button"
+                  role="switch"
+                  aria-checked={isActiveValue}
+                  disabled={isSubmitting}
+                  onClick={() =>
+                    setValue("isActive", !isActiveValue, { shouldValidate: true })
+                  }
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full
+                    border-2 border-transparent transition-colors focus-visible:outline-none
+                    focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+                    disabled:opacity-50
+                    ${isActiveValue ? "bg-blue-600" : "bg-zinc-300"}`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white
+                      shadow-lg ring-0 transition-transform
+                      ${isActiveValue ? "translate-x-5" : "translate-x-0"}`}
+                  />
+                </button>
+                <span className="text-sm text-muted-foreground">
+                  {isActiveValue ? "Active" : "Inactive"}
+                </span>
+              </div>
+            </Field>
+          )}
+
           {apiError && (
             <div
               role="alert"
@@ -295,6 +384,7 @@ export default function CreateServiceDialog({
           )}
         </form>
 
+        {/* Footer */}
         <div
           className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2
             border-t bg-muted/50 px-6 py-4 mt-4"
@@ -309,11 +399,13 @@ export default function CreateServiceDialog({
           </Button>
           <Button
             type="submit"
-            form="create-service-form"
+            form="service-form"
             disabled={isSubmitting}
             aria-busy={isSubmitting}
           >
-            {isSubmitting ? "Creating…" : "Create Service"}
+            {isSubmitting
+              ? isEditMode ? "Saving…" : "Creating…"
+              : isEditMode ? "Save Changes" : "Create Service"}
           </Button>
         </div>
       </DialogContent>

@@ -10,7 +10,6 @@ import { useCustomerAuthStore } from "../../../store/customerAuthStore";
 import { t } from "../../../i18";
 import { getMyBookings, type Booking, type BookingStatus } from "@/src/lib/bookings";
 import api from "@/src/lib/axiosIntercepter";
-import Header from "../../../components/common/header";
 
 
 const STATUS_STYLES: Record<BookingStatus, string> = {
@@ -99,9 +98,8 @@ export default function MyBookingPage() {
   }, [isAuthenticated, fetchBookings]);
 
   return (
-    <>      
-     <Header />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <header className="mb-8 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-zinc-900 sm:text-4xl">

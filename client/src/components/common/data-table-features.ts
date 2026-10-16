@@ -31,3 +31,6 @@ export const features = tableFeatures({
 // Pass this as the first generic argument to `ColumnDef`, `Column`, `Table`,
 // and `Row` so each type knows which feature APIs are available.
 export type DataTableFeatures = typeof features
+
+/** @deprecated use DataTableFeatures */
+export type TasksTableFeatures = DataTableFeatures

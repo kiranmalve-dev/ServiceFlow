@@ -48,6 +48,7 @@ export default function Dashboard() {
     const fetchDashbaord = React.useCallback(async () => {
       try {
         const response = await api.get("/admin/summary");
+        console.log('Response===' , response?.data)
         setDashbaordData(response?.data);
       } catch (error) {
         console.error("Failed to fetch services:", error);
@@ -57,8 +58,9 @@ export default function Dashboard() {
     }, []);
   
     React.useEffect(() => {
+      console.log("fetch data")
       fetchDashbaord();
-    }, [fetchDashbaord]);
+    }, []);
 
 
   
@@ -75,7 +77,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {/* <DashboardCards apiData={dashabordData} /> */}
+        <DashboardCards apiData={dashabordData} />
       </div>
 
       <div className="grid gap-6">

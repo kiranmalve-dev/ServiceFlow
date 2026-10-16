@@ -29,6 +29,7 @@ interface DashboardCardsProps {
 }
 
 export function DashboardCards({ apiData }: DashboardCardsProps) {
+  console.log("apiData--->" , apiData)
   return (
     <>
       {/* 1. Bookings Card */}
@@ -38,9 +39,9 @@ export function DashboardCards({ apiData }: DashboardCardsProps) {
           <Calendar className="size-5 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{apiData.bookings.total}</div>
+          <div className="text-2xl font-bold">{apiData?.bookings?.total}</div>
           <p className="mt-1 text-xs text-muted-foreground">
-            {apiData.bookings.pending} pending, {apiData.bookings.cancelled} cancelled
+            {apiData?.bookings?.pending} pending, {apiData?.bookings?.cancelled} cancelled
           </p>
         </CardContent>
       </Card>
@@ -52,7 +53,7 @@ export function DashboardCards({ apiData }: DashboardCardsProps) {
           <DollarSign className="size-5 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{apiData.revenue.totalFormatted}</div>
+          <div className="text-2xl font-bold">{apiData?.revenue?.totalFormatted}</div>
           <p className="mt-1 text-xs text-muted-foreground">
             Total earnings to date
           </p>
@@ -66,9 +67,9 @@ export function DashboardCards({ apiData }: DashboardCardsProps) {
           <Wrench className="size-5 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{apiData.services.active}</div>
+          <div className="text-2xl font-bold">{apiData?.services?.active}</div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Out of {apiData.services.total} total services
+            Out of {apiData?.services?.total} total services
           </p>
         </CardContent>
       </Card>
@@ -80,7 +81,7 @@ export function DashboardCards({ apiData }: DashboardCardsProps) {
           <Users className="size-5 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{apiData.customers.total}</div>
+          <div className="text-2xl font-bold">{apiData?.customers?.total}</div>
           <p className="mt-1 text-xs text-muted-foreground">
             Registered clients
           </p>

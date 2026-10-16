@@ -7,12 +7,8 @@ describe("HomePage — Hero section", () => {
   beforeEach(() => {
     render(<HomePage />);
   });
-
-  // ── Landmark / ARIA ────────────────────────────────────────────────────────
-
+  
   it("renders a section landmark labelled by the hero heading", () => {
-    // The <section> uses aria-labelledby="hero-heading", so the accessible
-    // name of the region equals the heading text.
     const section = screen.getByRole("region", {
       name: /book your next service online/i,
     });
@@ -69,9 +65,6 @@ describe("HomePage — Hero section", () => {
   // ── Decorative elements ────────────────────────────────────────────────────
 
   it("hides decorative blur circles from assistive technology", () => {
-    // Both decorative <div>s carry aria-hidden="true".
-    // querySelectorAll is used because aria-hidden elements are intentionally
-    // excluded from the accessible tree (getByRole / getByText won't find them).
     const decorative = document
       .querySelectorAll('[aria-hidden="true"]');
     expect(decorative.length).toBeGreaterThanOrEqual(2);
