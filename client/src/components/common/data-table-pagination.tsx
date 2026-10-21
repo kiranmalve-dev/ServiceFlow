@@ -19,8 +19,6 @@ import { type DataTableFeatures } from "./data-table-features"
 
 interface DataTablePaginationProps<TData extends RowData> {
   table: ReactTable<DataTableFeatures, TData>
-  // When these are supplied the component uses them instead of the
-  // TanStack row model counts (server-side pagination mode).
   totalCount?: number
   serverPage?: number
   serverPageSize?: number

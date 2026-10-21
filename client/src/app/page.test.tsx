@@ -1,11 +1,10 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import HomePage from "./page";
 
 // ── Hero section ──────────────────────────────────────────────────────────────
 describe("HomePage — Hero section", () => {
   beforeEach(() => {
-    render(<HomePage />);
+    render(<HomePage searchParams={Promise.resolve({})} />);
   });
   
   it("renders a section landmark labelled by the hero heading", () => {
@@ -36,8 +35,6 @@ describe("HomePage — Hero section", () => {
       screen.getByText(/online booking/i)
     ).toBeInTheDocument();
   });
-
-  // ── Body copy ──────────────────────────────────────────────────────────────
 
   it("renders the descriptive paragraph copy", () => {
     expect(

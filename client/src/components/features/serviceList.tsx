@@ -106,17 +106,31 @@ export default function ServicesList({
   const currentCategory = filters.category || "All";
   const allCategories = ["All", ...categories.filter((c) => c !== "All")];
   const hasFilters = currentCategory !== "All" || filters.search.trim() !== "";
-  const hasMore = services.length < total;
+  const totalPages = Math.ceil(total / filters.limit);
+  const currentPage = filters.page;
 
-  function clearFilters() {
-    startTransition(() => {
-      router.push(pathname, { scroll: false });
-    });
+  function goToPage(p: number) {
+    updateQueryParams({ page: String(p) });
   }
 
-  function handleLoadMore() {
-    const nextPage = filters.page + 1;
-    updateQueryParams({ page: String(nextPage) });
+  // Build the page number array with ellipsis:
+  // Always show first, last, current ±1.  Gap → null.
+  function buildPageNumbers(): (number | null)[] {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const pages: (number | null)[] = [];
+    const add = (n: number) => {
+      if (!pages.includes(n)) pages.push(n);
+    };
+    add(1);
+    if (currentPage > 3) pages.push(null);
+    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+      add(i);
+    }
+    if (currentPage < totalPages - 2) pages.push(null);
+    add(totalPages);
+    return pages;
   }
 
   return (
@@ -142,18 +156,6 @@ export default function ServicesList({
               hover:border-zinc-300 transition-colors
               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          {filters.search && (
-            <button
-              type="button"
-              onClick={() => updateQueryParams({ search: null })}
-              aria-label="Clear search"
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded
-                text-zinc-400 hover:text-zinc-600 transition-colors
-                focus:outline-2 focus:outline-blue-500"
-            >
-              <X size={14} aria-hidden="true" />
-            </button>
-          )}
         </div>
 
         <div className="relative shrink-0">
@@ -213,19 +215,6 @@ export default function ServicesList({
             </button>
           );
         })}
-
-        {hasFilters && (
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="rounded-full px-3.5 py-1.5 text-xs font-medium
-              border border-dashed border-zinc-300 text-zinc-400
-              hover:border-red-300 hover:text-red-500 hover:bg-red-50
-              transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
-          >
-            Clear filters
-          </button>
-        )}
       </div>
 
       <div className="flex items-center justify-between">
@@ -254,7 +243,7 @@ export default function ServicesList({
           <p className="text-zinc-400 text-sm mb-5">
             Try adjusting the category, search term, or sorting.
           </p>
-          <button
+          {/* <button
             type="button"
             onClick={clearFilters}
             className="rounded-lg border border-zinc-200 bg-white px-5 py-2 text-sm
@@ -262,13 +251,13 @@ export default function ServicesList({
               focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
             Clear all filters
-          </button>
+          </button> */}
         </div>
       )}
       {services.length > 0 && (
         <ul
           role="list"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4"
         >
           {services.map((service) => (
             <li key={service.id}>
@@ -331,26 +320,71 @@ export default function ServicesList({
         </ul>
       )}
 
-      {hasMore && (
-        <div className="flex justify-center mt-2">
+      {/* ── Pagination ─────────────────────────────────────────────────── */}
+      {totalPages > 1 && (
+        <nav
+          aria-label="Services pagination"
+          className="flex items-center justify-center gap-1 mt-4"
+        >
+          {/* Prev */}
           <button
             type="button"
-            disabled={isPending}
-            onClick={handleLoadMore}
-            className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white
-              transition-colors hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50
-              focus-visible:outline-none focus-visible:ring-2
-              focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+            disabled={currentPage <= 1 || isPending}
+            onClick={() => goToPage(currentPage - 1)}
+            aria-label="Previous page"
+            className="inline-flex items-center gap-1 rounded-lg border border-zinc-200
+              bg-white px-3.5 py-2 text-sm font-medium text-zinc-600
+              hover:bg-zinc-50 hover:border-zinc-300 transition-colors
+              disabled:opacity-40 disabled:cursor-not-allowed
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
-            {isPending ? "Loading..." : `Load More (${total - services.length} remaining)`}
+            ← Prev
           </button>
-        </div>
-      )}
 
-      {!hasMore && services.length > 0 && (
-        <p className="mt-2 text-center text-sm text-zinc-400">
-          All {total} services shown
-        </p>
+          {/* Page numbers with ellipsis */}
+          {buildPageNumbers().map((p, idx) =>
+            p === null ? (
+              <span key={`ellipsis-${idx}`} className="px-1 text-zinc-400 select-none">
+                …
+              </span>
+            ) : (
+              <button
+                key={p}
+                type="button"
+                disabled={isPending}
+                onClick={() => goToPage(p)}
+                aria-label={`Page ${p}`}
+                aria-current={p === currentPage ? "page" : undefined}
+                className={`inline-flex h-9 w-9 items-center justify-center rounded-lg
+                  text-sm font-medium transition-colors
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+                  disabled:opacity-40
+                  ${
+                    p === currentPage
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300"
+                  }`}
+              >
+                {p}
+              </button>
+            )
+          )}
+
+          {/* Next */}
+          <button
+            type="button"
+            disabled={currentPage >= totalPages || isPending}
+            onClick={() => goToPage(currentPage + 1)}
+            aria-label="Next page"
+            className="inline-flex items-center gap-1 rounded-lg border border-zinc-200
+              bg-white px-3.5 py-2 text-sm font-medium text-zinc-600
+              hover:bg-zinc-50 hover:border-zinc-300 transition-colors
+              disabled:opacity-40 disabled:cursor-not-allowed
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
+            Next →
+          </button>
+        </nav>
       )}
     </div>
   );

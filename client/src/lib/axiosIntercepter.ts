@@ -9,9 +9,6 @@ export interface ApiErrorResponse {
   code?: string;
 }
 
-// Because the response interceptor unwraps `response.data`, all api.post/get/etc.
-// calls return the body type T directly — not AxiosResponse<T>.
-// This augmentation keeps TypeScript aware of that.
 declare module 'axios' {
   export interface AxiosInstance {
     get<T = any>(url: string, config?: import('axios').AxiosRequestConfig): Promise<T>;

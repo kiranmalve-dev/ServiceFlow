@@ -4,6 +4,7 @@ import {  Tag, CheckCircle, XCircle } from "lucide-react";
 import { useLocaleStore } from "../../store/localeStore";
 import { t } from "../../i18";
 import BookingForm from "./serviceBokingForm";
+import Link from "next/link";
 
 interface ServiceDetailContentProps {
   service: {
@@ -19,27 +20,6 @@ interface ServiceDetailContentProps {
   barClass: string;
 }
 
-const CATEGORY_PILL: Record<string, string> = {
-  Cleaning:    "bg-teal-100   text-teal-700",
-  Beauty:      "bg-pink-100   text-pink-700",
-  Fitness:     "bg-orange-100 text-orange-700",
-  Wellness:    "bg-purple-100 text-purple-700",
-  Plumbing:    "bg-blue-100   text-blue-700",
-  Electrical:  "bg-yellow-100 text-yellow-700",
-  HVAC:        "bg-cyan-100   text-cyan-700",
-  Gardening:   "bg-green-100  text-green-700",
-};
-
-const CATEGORY_BAR: Record<string, string> = {
-  Cleaning:    "bg-teal-400",
-  Beauty:      "bg-pink-400",
-  Fitness:     "bg-orange-400",
-  Wellness:    "bg-purple-400",
-  Plumbing:    "bg-blue-400",
-  Electrical:  "bg-yellow-400",
-  HVAC:        "bg-cyan-400",
-  Gardening:   "bg-green-400",
-};
 
 export default function ServiceDetailContent({
   service,
@@ -155,14 +135,14 @@ export default function ServiceDetailContent({
             <p className="text-zinc-500 text-sm">
               {t(msgs, "serviceDetail.notAvailableMessage")}
             </p>
-            <a
+            <Link
               href="/"
               className="inline-block mt-6 px-6 py-2.5 rounded-lg bg-blue-600 text-white
                 font-medium text-sm hover:bg-blue-700 transition-colors
                 focus:outline-2 focus:outline-offset-2 focus:outline-blue-800"
             >
               {t(msgs, "serviceDetail.browseOtherServices")}
-            </a>
+            </Link>
           </div>
         )}
       </div>

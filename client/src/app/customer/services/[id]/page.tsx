@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ServiceDetailContent from "@/src/components/features/serviceDetailContent";
-
+import Header from "@/src/components/common/header"
 interface Service {
   id: string;
   name: string;
@@ -77,12 +77,13 @@ async function getService(id: string): Promise<{
   }
 }
 
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
 export default async function ServiceDetailPage({
   params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+}: PageProps) {
   const { id } = await params;
   const { service } = await getService(id);
 
@@ -94,6 +95,8 @@ export default async function ServiceDetailPage({
   const barClass = CATEGORY_BAR[service.category] ?? "bg-zinc-300";
 
   return (
+    <>
+    <Header />
     <main
       id="main-content"
       className="flex-1 bg-gradient-to-br from-zinc-50 to-blue-50 py-10 px-4"
@@ -106,5 +109,6 @@ export default async function ServiceDetailPage({
           />
         </div>
       </main>
+      </>
   );
 }

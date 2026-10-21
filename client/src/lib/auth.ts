@@ -49,8 +49,6 @@ const PORTAL_MISMATCH: Record<LoginPortal, string> = {
 
 export async function loginWithPortal(payload: LoginPayload): Promise<LoginResponse> {
   try {
-    // withCredentials: true is set on the axios instance, so the browser
-    // will store the HttpOnly cookie from the Set-Cookie response header.
     return await api.post<LoginResponse>("/auth/login", payload);
   } catch (err) {
     const apiErr = err as ApiErrorResponse;

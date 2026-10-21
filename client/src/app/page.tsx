@@ -1,9 +1,14 @@
-import React, { Suspense } from "react";
+
+
+
+
+import  { Suspense } from "react";
 import ServicesSection from "../components/features/services";
 import StatsStrip from "../components/features/statsStrip";
 import Header from "../components/common/header";
 import HeroSection from "../components/features/heroSection";
 import ServicesHeader from "../components/features/servicesHeader";
+import Loading from "./loading";
 
 export default async function HomePage ({
   searchParams,
@@ -12,6 +17,8 @@ export default async function HomePage ({
 }) {
   return (
     <>
+    
+      <Suspense fallback={<Loading />}>
       <Header />
       <section
         aria-labelledby="hero-heading"
@@ -46,6 +53,7 @@ export default async function HomePage ({
           <ServicesSection searchParams={searchParams} />
         </Suspense>
       </section>
+      </Suspense>
     </>
   );
 }

@@ -10,10 +10,6 @@ import { t } from "../../i18";
 import LoginDialog from "../features/loginDialog";
 import { logout } from "@/src/lib/auth";
 
-// ─── Inner component ─────────────────────────────────────────────────────────
-// All hooks that are dynamic at runtime (usePathname, useSearchParams, etc.)
-// live here. This component is rendered inside <Suspense> so Next.js can
-// prerender the static shell of any SSG/ISR page without being blocked.
 function HeaderInner() {
   const pathname = usePathname();
   const { msgs, dir, toggleLocale, locale } = useLocaleStore();
@@ -308,11 +304,6 @@ function HeaderInner() {
   );
 }
 
-// ─── Public export ────────────────────────────────────────────────────────────
-// Thin shell that wraps HeaderInner in <Suspense>.
-// This is what makes usePathname() safe on SSG/ISR Server Component pages
-// (e.g. /customer/services/[id]): Next.js prerenders the static fallback
-// and streams HeaderInner in once the client-side route value is available.
 export default function Header() {
   return (
     <Suspense

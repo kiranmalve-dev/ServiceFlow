@@ -1,9 +1,10 @@
-"use client";
+"use client"
 
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+
 import {
   Dialog,
   DialogContent,
@@ -34,23 +35,30 @@ const CATEGORIES = [
 const serviceSchema = z.object({
   name: z
     .string()
+    .trim()
     .min(2, "Name must be at least 2 characters")
     .max(100, "Name is too long"),
+
   category: z.enum(CATEGORIES, {
-    errorMap: () => ({ message: "Please select a valid category" }),
+    message: "Please select a valid category",
   }),
+
   description: z
     .string()
+    .trim()
     .min(5, "Description must be at least 5 characters")
     .max(500, "Description is too long"),
+
   price: z
-    .number({ invalid_type_error: "Price must be a number" })
+    .number({ message: "Price must be a number" })
     .int("Price must be a whole number")
     .positive("Price must be greater than 0"),
+
   duration: z
-    .number({ invalid_type_error: "Duration must be a number" })
+    .number({ message: "Duration must be a number" })
     .int("Duration must be a whole number")
     .positive("Duration must be greater than 0"),
+
   isActive: z.boolean(),
 });
 
@@ -59,15 +67,11 @@ type ServiceFormValues = z.infer<typeof serviceSchema>;
 interface CreateServiceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** When provided the dialog operates in edit mode */
   service?: Service | null;
-  /** Called after a new service is successfully created */
   onCreated?: (service: Service) => void;
-  /** Called after an existing service is successfully updated */
   onUpdated?: (service: Service) => void;
 }
 
-// ─── Reusable field wrapper ───────────────────────────────────────────────────
 function Field({
   label,
   htmlFor,
@@ -83,11 +87,18 @@ function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={htmlFor} className="text-sm font-medium text-foreground">
+      <label
+        htmlFor={htmlFor}
+        className="text-sm font-medium text-foreground"
+      >
         {label}
-        {required && <span className="text-destructive ml-0.5">*</span>}
+        {required && (
+          <span className="ml-0.5 text-destructive">*</span>
+        )}
       </label>
+
       {children}
+
       {error && (
         <p role="alert" className="text-xs text-destructive">
           {error}
@@ -97,7 +108,6 @@ function Field({
   );
 }
 
-// ─── Dialog ───────────────────────────────────────────────────────────────────
 export default function CreateServiceDialog({
   open,
   onOpenChange,
@@ -119,114 +129,103 @@ export default function CreateServiceDialog({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
       name: "",
-      category: undefined,
       description: "",
-      price: undefined,
-      duration: undefined,
       isActive: true,
     },
   });
 
-  // Populate form whenever the dialog opens:
-  // — edit mode  → fill with existing service values
-  // — create mode → blank slate
   React.useEffect(() => {
-    if (open) {
-      if (service) {
-        reset({
-          name:        service.name,
-          category:    service.category as (typeof CATEGORIES)[number],
-          description: service.description,
-          price:       service.price,
-          duration:    service.duration,
-          isActive:    service.isActive,
-        });
-      } else {
-        reset({
-          name: "",
-          category: undefined,
-          description: "",
-          price: undefined,
-          duration: undefined,
-          isActive: true,
-        });
-      }
-      setApiError(null);
+    if (!open) return;
+
+    if (service) {
+      reset({
+        name: service.name,
+        category: service.category as (typeof CATEGORIES)[number],
+        description: service.description,
+        price: service.price,
+        duration: service.duration,
+        isActive: service.isActive,
+      });
+    } else {
+      reset({
+        name: "",
+        category: undefined,
+        description: "",
+        price: undefined,
+        duration: undefined,
+        isActive: true,
+      });
     }
+
+    setApiError(null);
   }, [open, service, reset]);
 
   async function onSubmit(values: ServiceFormValues) {
     setApiError(null);
+
     try {
       const payload = {
-        name:        values.name.trim(),
-        category:    values.category,
+        name: values.name.trim(),
+        category: values.category,
         description: values.description.trim(),
-        price:       values.price,
-        duration:    values.duration,
-        isActive:    values.isActive,
+        price: values.price,
+        duration: values.duration,
+        isActive: values.isActive,
       };
 
       if (isEditMode && service) {
-        // ── Edit ──────────────────────────────────────────────────────────
-        const response = (await api.put(`/admin/services/${service.id}`, payload)) as {
-          success: boolean;
-          message: string;
-          data: Service;
-        };
+        const response = (await api.put(
+          `/admin/services/${service.id}`,
+          payload,
+        )) as { success: boolean; message: string; data: Service };
+
         onUpdated?.(response.data);
       } else {
-        // ── Create ────────────────────────────────────────────────────────
-        const response = (await api.post("/admin/services", payload)) as {
-          success: boolean;
-          message: string;
-          data: Service;
-        };
+        const response = (await api.post(
+          "/admin/services",
+          payload,
+        )) as { success: boolean; message: string; data: Service };
+
         onCreated?.(response.data);
       }
 
       onOpenChange(false);
-    } catch (err) {
-      const e = err as { message?: string };
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : undefined;
+
       setApiError(
-        e?.message ??
-          `Failed to ${isEditMode ? "update" : "create"} service. Please try again.`
+        message ??
+          `Failed to ${isEditMode ? "update" : "create"} service. Please try again.`,
       );
     }
   }
 
   const selectedCategory = watch("category");
-  const isActiveValue    = watch("isActive");
+  const isActiveValue = watch("isActive");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg p-0 overflow-hidden gap-0">
-
-        {/* Header */}
-        <div className="px-6 pt-6 pb-4">
+      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
+        <div className="px-6 pb-4 pt-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold">
               {isEditMode ? "Edit Service" : "Create New Service"}
             </DialogTitle>
+
             <DialogDescription className="text-sm text-muted-foreground">
               {isEditMode
                 ? "Update the details below and save your changes."
-                : "Fill in the details below. All fields marked "}
-              {!isEditMode && (
-                <>
-                  <span className="text-destructive font-medium">*</span> are required.
-                </>
-              )}
+                : "Fill in the details below. All fields marked * are required."}
             </DialogDescription>
           </DialogHeader>
         </div>
 
-        {/* Form body */}
         <form
           id="service-form"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
-          className="px-6 space-y-4 overflow-y-auto max-h-[60vh]"
+          className="max-h-[60vh] space-y-4 overflow-y-auto px-6"
         >
           <Field
             label="Service Name"
@@ -239,7 +238,9 @@ export default function CreateServiceDialog({
               placeholder="e.g. Deep Home Cleaning"
               aria-invalid={!!errors.name}
               disabled={isSubmitting}
-              {...register("name", { onChange: () => setApiError(null) })}
+              {...register("name", {
+                onChange: () => setApiError(null),
+              })}
             />
           </Field>
 
@@ -251,12 +252,15 @@ export default function CreateServiceDialog({
           >
             <Select
               value={selectedCategory}
-              onValueChange={(val) => {
-                setValue("category", val as (typeof CATEGORIES)[number], {
-                  shouldValidate: true,
-                });
+              onValueChange={(value) => {
+                setValue(
+                  "category",
+                  value as (typeof CATEGORIES)[number],
+                  { shouldValidate: true, shouldDirty: true },
+                );
                 setApiError(null);
               }}
+              disabled={isSubmitting}
             >
               <SelectTrigger
                 id="svc-category"
@@ -265,10 +269,11 @@ export default function CreateServiceDialog({
               >
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
+
               <SelectContent>
-                {CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
+                {CATEGORIES.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -287,13 +292,10 @@ export default function CreateServiceDialog({
               placeholder="Briefly describe what this service includes…"
               disabled={isSubmitting}
               aria-invalid={!!errors.description}
-              {...register("description", { onChange: () => setApiError(null) })}
-              className="w-full rounded-lg border border-input bg-transparent px-2.5 py-2
-                text-sm placeholder:text-muted-foreground resize-none
-                focus-visible:outline-none focus-visible:border-ring
-                focus-visible:ring-3 focus-visible:ring-ring/50
-                disabled:opacity-50 aria-invalid:border-destructive
-                transition-colors"
+              {...register("description", {
+                onChange: () => setApiError(null),
+              })}
+              className="w-full resize-none rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm placeholder:text-muted-foreground transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50 aria-[invalid=true]:border-destructive"
             />
           </Field>
 
@@ -341,7 +343,6 @@ export default function CreateServiceDialog({
             </Field>
           </div>
 
-          {/* Status toggle — only shown in edit mode */}
           {isEditMode && (
             <Field label="Status" htmlFor="svc-isActive">
               <div className="flex items-center gap-3 pt-0.5">
@@ -352,20 +353,22 @@ export default function CreateServiceDialog({
                   aria-checked={isActiveValue}
                   disabled={isSubmitting}
                   onClick={() =>
-                    setValue("isActive", !isActiveValue, { shouldValidate: true })
+                    setValue("isActive", !isActiveValue, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    })
                   }
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full
-                    border-2 border-transparent transition-colors focus-visible:outline-none
-                    focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
-                    disabled:opacity-50
-                    ${isActiveValue ? "bg-blue-600" : "bg-zinc-300"}`}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 ${
+                    isActiveValue ? "bg-blue-600" : "bg-zinc-300"
+                  }`}
                 >
                   <span
-                    className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white
-                      shadow-lg ring-0 transition-transform
-                      ${isActiveValue ? "translate-x-5" : "translate-x-0"}`}
+                    className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg transition-transform ${
+                      isActiveValue ? "translate-x-5" : "translate-x-0"
+                    }`}
                   />
                 </button>
+
                 <span className="text-sm text-muted-foreground">
                   {isActiveValue ? "Active" : "Inactive"}
                 </span>
@@ -376,19 +379,14 @@ export default function CreateServiceDialog({
           {apiError && (
             <div
               role="alert"
-              className="rounded-lg border border-destructive/30 bg-destructive/10
-                px-4 py-3 text-sm text-destructive"
+              className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
             >
               {apiError}
             </div>
           )}
         </form>
 
-        {/* Footer */}
-        <div
-          className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2
-            border-t bg-muted/50 px-6 py-4 mt-4"
-        >
+        <div className="mt-4 flex flex-col-reverse gap-2 border-t bg-muted/50 px-6 py-4 sm:flex-row sm:justify-end">
           <Button
             type="button"
             variant="outline"
@@ -397,6 +395,7 @@ export default function CreateServiceDialog({
           >
             Cancel
           </Button>
+
           <Button
             type="submit"
             form="service-form"
@@ -404,8 +403,12 @@ export default function CreateServiceDialog({
             aria-busy={isSubmitting}
           >
             {isSubmitting
-              ? isEditMode ? "Saving…" : "Creating…"
-              : isEditMode ? "Save Changes" : "Create Service"}
+              ? isEditMode
+                ? "Saving…"
+                : "Creating…"
+              : isEditMode
+                ? "Save Changes"
+                : "Create Service"}
           </Button>
         </div>
       </DialogContent>
