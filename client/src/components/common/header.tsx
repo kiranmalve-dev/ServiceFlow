@@ -117,7 +117,7 @@ function HeaderInner() {
                   text-sm font-medium text-zinc-700 bg-white hover:bg-zinc-50 transition-colors
                   focus:outline-2 focus:outline-offset-2 focus:outline-blue-600"
               >
-                {t(msgs, "navigation.toggleLanguage")}
+                {locale === "en" ? "עברית" : "English"}
               </button>
 
               {isAuthenticated && user ? (
@@ -248,7 +248,7 @@ function HeaderInner() {
                     text-sm font-medium text-zinc-700 bg-white hover:bg-zinc-50 transition-colors
                     focus:outline-2 focus:outline-offset-2 focus:outline-blue-600"
                 >
-                  {t(msgs, "navigation.toggleLanguage")}
+                  {locale === "en" ? "עברית" : "English"}
                 </button>
 
                 {isAuthenticated && user ? (

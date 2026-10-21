@@ -7,17 +7,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { type Messages, t } from "@/src/i18";
 
 const STATUS_PILL: Record<BookingStatus, string> = {
-  PENDING:   "bg-yellow-100 text-yellow-800 border-yellow-200",
-  CONFIRMED: "bg-blue-100   text-blue-800   border-blue-200",
-  COMPLETED: "bg-green-100  text-green-800  border-green-200",
-  CANCELLED: "bg-red-100    text-red-700    border-red-200",
+  PENDING:     "bg-yellow-100 text-yellow-800 border-yellow-200",
+  CONFIRMED:   "bg-blue-100   text-blue-800   border-blue-200",
+  IN_PROGRESS: "bg-purple-100 text-purple-800 border-purple-200",
+  COMPLETED:   "bg-green-100  text-green-800  border-green-200",
+  CANCELLED:   "bg-red-100    text-red-700    border-red-200",
 };
 
 const STATUS_LABELS: Record<BookingStatus, string> = {
-  PENDING:   "admin.status.pending",
-  CONFIRMED: "admin.status.confirmed",
-  COMPLETED: "admin.status.completed",
-  CANCELLED: "admin.status.cancelled",
+  PENDING:     "admin.status.pending",
+  CONFIRMED:   "admin.status.confirmed",
+  IN_PROGRESS: "admin.status.in_progress",
+  COMPLETED:   "admin.status.completed",
+  CANCELLED:   "admin.status.cancelled",
+};
+
+const ALLOWED_TRANSITIONS: Record<BookingStatus, BookingStatus[]> = {
+  PENDING:     ["CONFIRMED", "CANCELLED"],
+  CONFIRMED:   ["IN_PROGRESS", "CANCELLED"],
+  IN_PROGRESS: ["COMPLETED"],
+  COMPLETED:   [],
+  CANCELLED:   [],
 };
 
 interface BookingColumnsProps {
@@ -57,9 +67,18 @@ export function getBookingColumns({
         const d = new Date(row.original.scheduledAt);
         return (
           <div className="min-w-[110px] text-sm">
-            <p>{d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
+            <p>
+              {d.toLocaleDateString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
+            </p>
             <p className="text-xs text-muted-foreground">
-              {d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+              {d.toLocaleTimeString("en-IN", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </p>
           </div>
         );
@@ -89,7 +108,7 @@ export function getBookingColumns({
       header: "Status",
       cell: ({ row }) => {
         const status = row.original.status;
-        const label = t(msgs, STATUS_LABELS[status]);
+        const label  = t(msgs, STATUS_LABELS[status] ?? status);
         return (
           <span
             className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs
@@ -104,31 +123,33 @@ export function getBookingColumns({
       id: "statusAction",
       header: "Change Status",
       cell: ({ row }) => {
-        const booking = row.original;
-        const isTerminal =
-          booking.status === "COMPLETED" || booking.status === "CANCELLED";
+        const booking    = row.original;
+        const nextStates = ALLOWED_TRANSITIONS[booking.status] ?? [];
 
-        if (isTerminal) {
+        // Terminal statuses (COMPLETED, CANCELLED) have no valid transitions
+        if (nextStates.length === 0) {
           return (
-            <span className="text-xs text-muted-foreground italic">No actions</span>
+            <span className="text-xs text-muted-foreground italic">
+              No actions
+            </span>
           );
         }
 
         return (
           <Select
-            value={booking.status}
             onValueChange={(value) =>
               onStatusChange(booking.id, value as BookingStatus)
             }
           >
-            <SelectTrigger className="w-[140px] h-8 text-xs">
-              <SelectValue />
+            <SelectTrigger className="w-[150px] h-8 text-xs">
+              <SelectValue placeholder="Move to…" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="PENDING">{t(msgs, "admin.status.pending")}</SelectItem>
-              <SelectItem value="CONFIRMED">{t(msgs, "admin.status.confirmed")}</SelectItem>
-              <SelectItem value="COMPLETED">{t(msgs, "admin.status.completed")}</SelectItem>
-              <SelectItem value="CANCELLED">{t(msgs, "admin.status.cancelled")}</SelectItem>
+              {nextStates.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {t(msgs, STATUS_LABELS[s] ?? s)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         );
@@ -139,7 +160,9 @@ export function getBookingColumns({
       header: "Created",
       cell: ({ row }) =>
         new Date(row.original.createdAt).toLocaleDateString("en-IN", {
-          day: "2-digit", month: "short", year: "numeric",
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
         }),
     },
   ];

@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  transpilePackages: ["@tanstack/react-table", "@tanstack/table-core", "@tanstack/react-store"],
   turbopack: {
     rules: {
       "*.css": {

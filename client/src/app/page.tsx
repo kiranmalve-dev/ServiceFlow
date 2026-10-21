@@ -3,9 +3,9 @@
 
 
 import  { Suspense } from "react";
+import Header from "../components/common/header";
 import ServicesSection from "../components/features/services";
 import StatsStrip from "../components/features/statsStrip";
-import Header from "../components/common/header";
 import HeroSection from "../components/features/heroSection";
 import ServicesHeader from "../components/features/servicesHeader";
 import Loading from "./loading";
@@ -24,10 +24,14 @@ export default async function HomePage ({
         aria-labelledby="hero-heading"
         className="relative bg-gradient-to-br from-blue-600 to-blue-800 text-white overflow-hidden"
       >
-        <div
-          aria-hidden="true"
-          className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-white/10 blur-3xl"
-        />
+       <div
+      aria-hidden="true"
+      className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-white/10 blur-3xl"
+    />
+      <div
+        aria-hidden="true"
+        className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-blue-400/10 blur-3xl"
+      />
         <HeroSection />
       </section>
       <StatsStrip />

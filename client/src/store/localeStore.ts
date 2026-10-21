@@ -38,8 +38,17 @@ export const useLocaleStore = create<LocaleState>()(
     }),
     {
       name: "locale-preference",
+      // Only persist locale — msgs is always derived fresh from the imported
+      // messages object so stale serialized translations never block new keys.
+      partialize: (state) => ({ locale: state.locale }),
       onRehydrateStorage: () => (state) => {
-        state?.setHasHydrated(true);
+        if (state) {
+          // Recompute msgs and dir from the persisted locale so the store
+          // always reflects the current translation files, not a stale copy.
+          state.msgs = messages[state.locale];
+          state.dir  = getDirection(state.locale);
+          state.setHasHydrated(true);
+        }
       },
     }
   )

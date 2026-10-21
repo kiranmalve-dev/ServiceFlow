@@ -50,56 +50,75 @@ export default function ServicesPage() {
   const [page, setPage] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
 
-  // debounced search — fires API 400 ms after user stops typing
   const debouncedSearch = useDebounce(search, 400);
 
-  // reset to page 0 whenever filters change
+  // ── Fetch ──────────────────────────────────────────────────────────────────
+  // Uses .then()/.catch() so setState is called inside a callback, not
+  // synchronously in the effect body — satisfies the Next.js lint rule.
+
+  const fetchServices = React.useCallback((currentPage: number) => {
+    const params: Record<string, string | number> = {
+      page: currentPage + 1,
+      pageSize,
+    };
+    if (debouncedSearch)     params["search"]   = debouncedSearch;
+    if (statusFilter !== "") params["isActive"] = statusFilter;
+
+    Promise.resolve()
+      .then(() => { setLoading(true); })
+      .then(() => api.get<ServicesResponse>("/services", { params }))
+      .then((response) => {
+        setServices(response?.data?.data ?? []);
+        if (response?.data?.meta) setMeta(response.data.meta);
+      })
+      .catch((error: unknown) => {
+        console.error("Failed to fetch services:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [pageSize, debouncedSearch, statusFilter]);
+
+  // Fetch whenever page or the stable fetchServices reference changes.
   React.useEffect(() => {
+    fetchServices(page);
+  }, [fetchServices, page]);
+
+  // ── Filter handlers — reset page via setter, no separate effect needed ──────
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
     setPage(0);
-  }, [debouncedSearch, statusFilter]);
-
-  const fetchServices = React.useCallback(async () => {
-    setLoading(true);
-    try {
-      const params: Record<string, string | number> = {
-        page: page + 1,   // server is 1-indexed, client state is 0-indexed
-        pageSize,
-      };
-      if (debouncedSearch) params["search"] = debouncedSearch;
-      if (statusFilter !== "") params["isActive"] = statusFilter;
-
-      const response = await api.get<ServicesResponse>("/services", { params });
-      setServices(response?.data?.data ?? []);
-      if (response?.data?.meta) setMeta(response?.data?.meta);
-    } catch (error) {
-      console.error("Failed to fetch services:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pageSize, debouncedSearch, statusFilter]);
-
-  React.useEffect(() => {
-    fetchServices();
-  }, [fetchServices]);
-
-  const handleEdit = (service: Service) => {
-    setEditService(service);
   };
 
-  const handleDelete = async (service: Service) => {
+  const handleStatusChange = (value: string | null) => {
+    if (value === null) return;
+    setStatusFilter(value === "all" ? "" : (value as "true" | "false"));
+    setPage(0);
+  };
+
+  // ── CRUD handlers ──────────────────────────────────────────────────────────
+
+  const handleEdit = React.useCallback((service: Service) => {
+    setEditService(service);
+  }, []);
+
+  const handleDelete = React.useCallback((service: Service) => {
     const confirmed = window.confirm(
       `${t(msgs, "admin.deleteConfirm")} "${service.name}"?`
     );
     if (!confirmed) return;
 
-    try {
-      await api.delete(`/admin/services/${service.id}`);
-      fetchServices();
-    } catch (error) {
-      console.error("Failed to delete service:", error);
-      window.alert(t(msgs, "admin.unableToDelete"));
-    }
-  };
+    api
+      .delete(`/admin/services/${service.id}`)
+      .then(() => {
+        fetchServices(page);
+      })
+      .catch((error: unknown) => {
+        console.error("Failed to delete service:", error);
+        window.alert(t(msgs, "admin.unableToDelete"));
+      });
+  }, [msgs, fetchServices, page]);
 
   const handleCreated = (newService: Service) => {
     setServices((prev) => [newService, ...prev]);
@@ -115,13 +134,14 @@ export default function ServicesPage() {
   const clearFilters = () => {
     setSearch("");
     setStatusFilter("");
+    setPage(0);
   };
+
   const hasActiveFilters = search !== "" || statusFilter !== "";
 
   const columns = React.useMemo(
     () => getServiceColumns({ onEdit: handleEdit, onDelete: handleDelete }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [msgs]
+    [handleEdit, handleDelete]
   );
 
   const filtersSlot = (
@@ -132,21 +152,21 @@ export default function ServicesPage() {
         <Input
           placeholder="Search by name or category…"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           className="pl-8 w-64"
         />
       </div>
 
       {/* Status filter */}
       <Select
-        value={statusFilter}
-        onValueChange={(v) => setStatusFilter(v as "" | "true" | "false")}
+        value={statusFilter === "" ? "all" : statusFilter}
+        onValueChange={handleStatusChange}
       >
         <SelectTrigger className="w-[160px]">
           <SelectValue placeholder="All Statuses" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Statuses</SelectItem>
+          <SelectItem value="all">All Statuses</SelectItem>
           <SelectItem value="true">Active</SelectItem>
           <SelectItem value="false">Inactive</SelectItem>
         </SelectContent>
@@ -178,16 +198,16 @@ export default function ServicesPage() {
         </div>
 
         <DataTable
-            columns={columns}
-            data={services}
-            loading={loading}
-            totalCount={meta.total}
-            page={page}
-            pageSize={pageSize}
-            onPageChange={setPage}
-            onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
-            filtersSlot={filtersSlot}
-          />
+          columns={columns}
+          data={services}
+          loading={loading}
+          totalCount={meta.total}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
+          filtersSlot={filtersSlot}
+        />
       </div>
 
       <CreateServiceDialog

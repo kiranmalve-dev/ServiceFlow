@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ServiceDetailContent from "@/src/components/features/serviceDetailContent";
-import Header from "@/src/components/common/header"
 interface Service {
   id: string;
   name: string;
@@ -69,7 +68,7 @@ async function getService(id: string): Promise<{
     const service: Service = json.data;
     return { service, error: null };
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return {
       service: null,
       error: "Unable to connect to the server.",
@@ -96,7 +95,6 @@ export default async function ServiceDetailPage({
 
   return (
     <>
-    <Header />
     <main
       id="main-content"
       className="flex-1 bg-gradient-to-br from-zinc-50 to-blue-50 py-10 px-4"

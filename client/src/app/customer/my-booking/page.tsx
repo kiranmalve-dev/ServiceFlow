@@ -7,10 +7,9 @@ import { CalendarDays, Clock, MapPin, RefreshCw } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { useLocaleStore } from "../../../store/localeStore";
 import { useCustomerAuthStore } from "../../../store/customerAuthStore";
-import { t } from "../../../i18";
+import { t, type Messages } from "../../../i18";
 import { getMyBookings, type Booking, type BookingStatus } from "@/src/lib/bookings";
 import api from "@/src/lib/axiosIntercepter";
-import Header from "@/src/components/common/header";
 
 
 const STATUS_STYLES: Record<BookingStatus, string> = {
@@ -21,8 +20,8 @@ const STATUS_STYLES: Record<BookingStatus, string> = {
   CANCELLED:   "bg-red-100    text-red-700    border-red-200",
 };
 
-function statusLabel(msgs: ReturnType<typeof useLocaleStore>, status: BookingStatus): string {
-  const map: Partial<Record<BookingStatus, string>>["msgs"] = {
+function statusLabel(msgs: Messages, status: BookingStatus): string {
+  const map: Partial<Record<BookingStatus, string>> = {
     CONFIRMED: t(msgs, "myBooking.status.confirmed"),
     PENDING:   t(msgs, "myBooking.status.pending"),
     CANCELLED: t(msgs, "myBooking.status.cancelled"),
@@ -100,7 +99,6 @@ export default function MyBookingPage() {
 
   return (
     <>
-     <Header />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <header className="mb-8 flex items-start justify-between gap-4">
         <div>

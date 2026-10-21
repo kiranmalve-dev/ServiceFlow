@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useLocaleStore } from "../../store/localeStore";
 import { t } from "../../i18";
 

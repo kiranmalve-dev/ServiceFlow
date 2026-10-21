@@ -88,7 +88,7 @@ async function getServices(filters: ServiceFilters): Promise<ServicesResponse> {
 
     const json: ApiResponse = await res.json();
     const services = json?.data?.data ?? [];
-    const total = json?.data?.meta?.total ?? 0;
+    const total = json?.data?.pagination?.total ?? 0;
 
     const categories =
       json?.data?.categories ??

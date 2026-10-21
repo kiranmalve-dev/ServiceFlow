@@ -25,11 +25,10 @@ export interface DashboardStatsData {
 
 // 2. Component Props Interface
 interface DashboardCardsProps {
-  apiData: DashboardStatsData;
+  apiData: DashboardStatsData | undefined;
 }
 
 export function DashboardCards({ apiData }: DashboardCardsProps) {
-  console.log("apiData--->" , apiData)
   return (
     <>
       {/* 1. Bookings Card */}

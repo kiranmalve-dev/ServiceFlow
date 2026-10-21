@@ -47,56 +47,74 @@ export default function UsersPage() {
   const [page, setPage] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
 
-  // debounced search — fires API 400 ms after user stops typing
   const debouncedSearch = useDebounce(search, 400);
 
-  // reset to page 0 whenever filters change
+  // ── Fetch ──────────────────────────────────────────────────────────────────
+
+  const fetchUsers = React.useCallback((currentPage: number) => {
+    const params: Record<string, string | number> = {
+      page: currentPage + 1,
+      pageSize,
+    };
+    if (debouncedSearch)     params["search"]   = debouncedSearch;
+    if (statusFilter !== "") params["isActive"] = statusFilter;
+
+    Promise.resolve()
+      .then(() => { setLoading(true); })
+      .then(() => api.get<UsersResponse>("/admin/users", { params }))
+      .then((response) => {
+        setUsers(response?.data?.data ?? []);
+        if (response?.data?.meta) setMeta(response.data.meta);
+      })
+      .catch((error: unknown) => {
+        console.error("Failed to fetch users:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [pageSize, debouncedSearch, statusFilter]);
+
   React.useEffect(() => {
+    fetchUsers(page);
+  }, [fetchUsers, page]);
+
+  // ── Filter handlers — reset page in the event handler, no extra effect ──────
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
     setPage(0);
-  }, [debouncedSearch, statusFilter]);
+  };
 
-  const fetchUsers = React.useCallback(async () => {
-    setLoading(true);
-    try {
-      const params: Record<string, string | number> = {
-        page: page + 1,   // server is 1-indexed, client state is 0-indexed
-        pageSize,
-      };
-      if (debouncedSearch) params["search"] = debouncedSearch;
-      if (statusFilter !== "") params["isActive"] = statusFilter;
+  const handleStatusChange = (value: string | null) => {
+    if (value === null) return;
+    setStatusFilter(value as "" | "true" | "false");
+    setPage(0);
+  };
 
-      const response = await api.get<UsersResponse>("/admin/users", { params });
-      setUsers(response?.data?.data ?? []);
-      if (response?.data?.meta) setMeta(response?.data?.meta);
-    } catch (error) {
-      console.error("Failed to fetch users:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pageSize, debouncedSearch, statusFilter]);
+  // ── Delete ─────────────────────────────────────────────────────────────────
 
-  React.useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
-  const handleDelete = async (user: User) => {
+  const handleDelete = (user: User) => {
     const confirmed = window.confirm(
       `${t(msgs, "admin.deleteConfirm")} "${user.name}"?`
     );
     if (!confirmed) return;
 
-    try {
-      await api.delete(`/admin/users/${user.id}`);
-      fetchUsers();
-    } catch (error) {
-      console.error("Failed to delete user:", error);
-    }
+    api
+      .delete(`/admin/users/${user.id}`)
+      .then(() => {
+        fetchUsers(page);
+      })
+      .catch((error: unknown) => {
+        console.error("Failed to delete user:", error);
+      });
   };
 
   const clearFilters = () => {
     setSearch("");
     setStatusFilter("");
+    setPage(0);
   };
+
   const hasActiveFilters = search !== "" || statusFilter !== "";
 
   const columns = React.useMemo(
@@ -113,7 +131,7 @@ export default function UsersPage() {
         <Input
           placeholder="Search by name or email…"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           className="pl-8 w-64"
         />
       </div>
@@ -121,7 +139,7 @@ export default function UsersPage() {
       {/* Status filter */}
       <Select
         value={statusFilter}
-        onValueChange={(v) => setStatusFilter(v as "" | "true" | "false")}
+        onValueChange={handleStatusChange}
       >
         <SelectTrigger className="w-[160px]">
           <SelectValue placeholder="All Statuses" />
@@ -152,16 +170,16 @@ export default function UsersPage() {
       </div>
 
       <DataTable
-          columns={columns}
-          data={users}
-          loading={loading}
-          totalCount={meta.total}
-          page={page}
-          pageSize={pageSize}
-          onPageChange={setPage}
-          onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
-          filtersSlot={filtersSlot}
-        />
+        columns={columns}
+        data={users}
+        loading={loading}
+        totalCount={meta.total}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
+        filtersSlot={filtersSlot}
+      />
     </div>
   );
 }

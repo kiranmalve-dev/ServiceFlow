@@ -30,10 +30,11 @@ interface BookingsResponse {
 
 const STATUS_OPTIONS: { label: string; value: BookingStatus | "" }[] = [
   { label: "All Statuses", value: "" },
-  { label: "Pending",      value: "PENDING" },
-  { label: "Confirmed",    value: "CONFIRMED" },
-  { label: "Completed",    value: "COMPLETED" },
-  { label: "Cancelled",    value: "CANCELLED" },
+  { label: "Pending",     value: "PENDING" },
+  { label: "Confirmed",   value: "CONFIRMED" },
+  { label: "In Progress", value: "IN_PROGRESS" },
+  { label: "Completed",   value: "COMPLETED" },
+  { label: "Cancelled",   value: "CANCELLED" },
 ];
 
 export default function BookingPage() {
@@ -58,49 +59,75 @@ export default function BookingPage() {
   const [page, setPage] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
 
-  // debounced search — fires API 400 ms after user stops typing
   const debouncedSearch = useDebounce(search, 400);
 
-  // reset to page 0 whenever any filter changes
+  // ── Fetch ──────────────────────────────────────────────────────────────────
+  // Uses .then()/.catch() so setState is called inside a callback, not
+  // synchronously in the effect body — satisfies the Next.js lint rule.
+
+  const fetchBookings = React.useCallback((currentPage: number) => {
+    const params: Record<string, string | number> = {
+      page: currentPage + 1,
+      pageSize,
+    };
+    if (debouncedSearch) params["search"]   = debouncedSearch;
+    if (statusFilter)    params["status"]   = statusFilter;
+    if (dateFrom)        params["dateFrom"] = dateFrom;
+    if (dateTo)          params["dateTo"]   = dateTo;
+
+    Promise.resolve()
+      .then(() => { setLoading(true); setError(null); })
+      .then(() => api.get<BookingsResponse>("/admin/bookings", { params }))
+      .then((response) => {
+        setBookings(response?.data?.data ?? []);
+        if (response?.data?.meta) setMeta(response.data.meta);
+      })
+      .catch((err: unknown) => {
+        const e = err as { message?: string };
+        setError(e?.message ?? t(msgs, "admin.error.failedToLoad"));
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [pageSize, debouncedSearch, statusFilter, dateFrom, dateTo, msgs]);
+
   React.useEffect(() => {
+    fetchBookings(page);
+  }, [fetchBookings, page]);
+
+  // ── Filter handlers — reset page in the event handler, no extra effect ──────
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
     setPage(0);
-  }, [debouncedSearch, statusFilter, dateFrom, dateTo]);
+  };
 
-  const fetchBookings = React.useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params: Record<string, string | number> = {         
-        page: page + 1,
-        pageSize 
-      };
-      if (debouncedSearch) params["search"] = debouncedSearch;
-      if (statusFilter)    params["status"]  = statusFilter;
-      if (dateFrom)        params["dateFrom"] = dateFrom;
-      if (dateTo)          params["dateTo"]   = dateTo;
+  const handleStatusChange = (value: BookingStatus | "") => {
+    setStatusFilter(value);
+    setPage(0);
+  };
 
-      const response = await api.get<BookingsResponse>("/admin/bookings", { params });
-      setBookings(response?.data?.data ?? []);
-      if (response?.data?.meta) setMeta(response?.data?.meta);
-    } catch (err) {
-      const e = err as { message?: string };
-      setError(e?.message ?? t(msgs, "admin.error.failedToLoad"));
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pageSize, debouncedSearch, statusFilter, dateFrom, dateTo, msgs]);
+  const handleDateFromChange = (value: string) => {
+    setDateFrom(value);
+    setPage(0);
+  };
 
-  React.useEffect(() => {
-    fetchBookings();
-  }, [fetchBookings]);
+  const handleDateToChange = (value: string) => {
+    setDateTo(value);
+    setPage(0);
+  };
 
-  const updateStatus = async (bookingId: string, status: BookingStatus) => {
-    try {
-      const res = await api.patch(`/admin/bookings/${bookingId}/status`, { status });
-      if (res?.success) fetchBookings();
-    } catch (err) {
-      console.error("Failed to update status:", err);
-    }
+  // ── Status update ──────────────────────────────────────────────────────────
+
+  const updateStatus = (bookingId: string, status: BookingStatus) => {
+    api
+      .patch(`/admin/bookings/${bookingId}/status`, { status })
+      .then((res) => {
+        if (res?.success) fetchBookings(page);
+      })
+      .catch((err: unknown) => {
+        console.error("Failed to update status:", err);
+      });
   };
 
   const clearFilters = () => {
@@ -108,7 +135,9 @@ export default function BookingPage() {
     setStatusFilter("");
     setDateFrom("");
     setDateTo("");
+    setPage(0);
   };
+
   const hasActiveFilters =
     search !== "" || statusFilter !== "" || dateFrom !== "" || dateTo !== "";
 
@@ -126,7 +155,7 @@ export default function BookingPage() {
         <Input
           placeholder={t(msgs, "admin.filters.search") + "…"}
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           className="pl-8 w-56"
         />
       </div>
@@ -134,7 +163,7 @@ export default function BookingPage() {
       {/* Status filter */}
       <Select
         value={statusFilter}
-        onValueChange={(v) => setStatusFilter(v as BookingStatus | "")}
+        onValueChange={(v) => handleStatusChange(v as BookingStatus | "")}
       >
         <SelectTrigger className="w-[160px]">
           <SelectValue placeholder={t(msgs, "admin.filters.allStatuses")} />
@@ -158,7 +187,7 @@ export default function BookingPage() {
         <Input
           type="date"
           value={dateFrom}
-          onChange={(e) => setDateFrom(e.target.value)}
+          onChange={(e) => handleDateFromChange(e.target.value)}
           className="w-[150px] h-9"
         />
       </div>
@@ -171,7 +200,7 @@ export default function BookingPage() {
         <Input
           type="date"
           value={dateTo}
-          onChange={(e) => setDateTo(e.target.value)}
+          onChange={(e) => handleDateToChange(e.target.value)}
           className="w-[150px] h-9"
         />
       </div>
@@ -199,23 +228,23 @@ export default function BookingPage() {
       {error && (
         <div className="flex items-center gap-3 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
           <span>{error}</span>
-          <Button variant="outline" size="sm" onClick={fetchBookings}>
+          <Button variant="outline" size="sm" onClick={() => fetchBookings(page)}>
             {t(msgs, "admin.error.retry")}
           </Button>
         </div>
       )}
 
       <DataTable
-          columns={columns}
-          data={bookings}
-          loading={loading}
-          totalCount={meta.total}
-          page={page}
-          pageSize={pageSize}
-          onPageChange={setPage}
-          onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
-          filtersSlot={filtersSlot}
-        />
+        columns={columns}
+        data={bookings}
+        loading={loading}
+        totalCount={meta.total}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
+        filtersSlot={filtersSlot}
+      />
     </div>
   );
 }

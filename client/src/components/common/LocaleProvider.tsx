@@ -2,8 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useLocaleStore } from "../../store/localeStore";
-import Header from "./header";
 
+/**
+ * Mounts in RootLayout (every route).
+ * Only job: keep <html lang> and <html dir> in sync with the Zustand locale
+ * after client hydration. Renders no visible UI.
+ */
 export default function LocaleProvider() {
   const { locale, dir, _hasHydrated } = useLocaleStore();
   const [mounted, setMounted] = useState(false);
@@ -23,8 +27,7 @@ export default function LocaleProvider() {
       html.style.removeProperty("--font-body");
     }
   }, [locale, dir, mounted]);
-  
-  if (!mounted || !_hasHydrated) return null;
 
-  return <Header />;
+  // Renders nothing — this component only has DOM side-effects
+  return null;
 }

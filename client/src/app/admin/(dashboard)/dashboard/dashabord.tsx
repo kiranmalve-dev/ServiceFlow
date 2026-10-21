@@ -3,10 +3,6 @@
 
 import Link from "next/link";
 import {
-  CalendarDays,
-  ClipboardList,
-  Clock3,
-  CheckCircle2,
   ArrowUpRight,
 } from "lucide-react";
 
@@ -19,17 +15,11 @@ import {
 import React  from "react";
 import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
-import { dashboardStats, recentBookings, serviceOverview } from "./dashbaord";
+import { recentBookings, serviceOverview } from "./dashbaord";
 import BookingChart from "@/src/components/common/booking-chart";
 import api from "@/src/lib/axiosIntercepter";
-import { DashboardCards } from "./dashbaordCard";
+import { DashboardCards, type DashboardStatsData } from "./dashbaordCard";
 
-const statIcons = {
-  services: ClipboardList,
-  bookings: CalendarDays,
-  pending: Clock3,
-  completed: CheckCircle2,
-};
 
 function statusVariant(status: string) {
   switch (status) {
@@ -43,24 +33,22 @@ function statusVariant(status: string) {
 }
 
 export default function Dashboard() {
-  const [dashabordData , setDashbaordData] =React.useState();
+  const [dashabordData, setDashbaordData] = React.useState<DashboardStatsData | undefined>(undefined);
 
-    const fetchDashbaord = React.useCallback(async () => {
-      try {
-        const response = await api.get("/admin/summary");
-        console.log('Response===' , response?.data)
+  const fetchDashbaord = React.useCallback(() => {
+    Promise.resolve()
+      .then(() => api.get<{ data: DashboardStatsData }>("/admin/summary"))
+      .then((response) => {
         setDashbaordData(response?.data);
-      } catch (error) {
-        console.error("Failed to fetch services:", error);
-      } finally {
-        // setLoading(false);
-      }
-    }, []);
-  
-    React.useEffect(() => {
-      console.log("fetch data")
-      fetchDashbaord();
-    }, []);
+      })
+      .catch((error: unknown) => {
+        console.error("Failed to fetch dashboard:", error);
+      });
+  }, []);
+
+  React.useEffect(() => {
+    fetchDashbaord();
+  }, [fetchDashbaord]);
 
 
   

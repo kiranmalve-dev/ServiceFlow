@@ -4,7 +4,7 @@
     "services": "Services",
     "myBooking": "My Booking",
     "bookService": "Book a Service",
-    "toggleLanguage": "עברית",
+    "toggleLanguage": "he",
     "skipToContent": "Skip to main content",
     "myBookings": "My Bookings",
     "signOut": "Sign out"
@@ -115,6 +115,7 @@
     "status": {
       "pending": "Pending",
       "confirmed": "Confirmed",
+      "in_progress": "In Progress",
       "completed": "Completed",
       "cancelled": "Cancelled"
     },

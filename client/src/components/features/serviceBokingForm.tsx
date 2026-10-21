@@ -130,7 +130,7 @@ export default function BookingForm({ service }: Props) {
               type="button"
               aria-haspopup="dialog"
               aria-expanded={calendarOpen}
-              aria-labelledby="date-label"
+              aria-label={selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
               onClick={() => setCalendarOpen((v) => !v)}
               className={`
                 w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-left

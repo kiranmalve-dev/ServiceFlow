@@ -4,7 +4,7 @@
     "services": "שירותים",
     "myBooking": "ההזמנות שלי",
     "bookService": "הזמנת שירות",
-    "toggleLanguage": "English",
+    "toggleLanguage": "en",
     "skipToContent": "דלג לתוכן הראשי",
     "myBookings": "ההזמנות שלי",
     "signOut": "התנתק"
@@ -115,6 +115,7 @@
     "status": {
       "pending": "ממתין",
       "confirmed": "מאושר",
+      "in_progress": "בביצוע",
       "completed": "הושלם",
       "cancelled": "בוטל"
     },
