@@ -49,7 +49,8 @@ export function validateCreateBooking(
 
 // ── Admin status update ───────────────────────────────────────────────────────
 
-const VALID_STATUSES = ["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"] as const;
+// Must stay in sync with VALID_STATUS_TRANSITIONS in types/index.ts
+const VALID_STATUSES = ["PENDING", "CONFIRMED", "IN_PROGRESS", "COMPLETED", "CANCELLED"] as const;
 
 export const updateStatusSchema = z.object({
   status: z
