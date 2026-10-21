@@ -85,7 +85,9 @@
   "services": {
     "title": "Our Services",
     "subtitle": "Choose from our range of professional services and book instantly.",
-    "loading": "Loading services..."
+    "loading": "Loading services...",
+    "bookNow":"Book Now",
+    "noServiceFile":"No Service Found"
   },
   "serviceDetail": {
     "backToServices": "Back to services",

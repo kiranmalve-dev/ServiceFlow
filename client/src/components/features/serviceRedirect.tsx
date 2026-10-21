@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCustomerAuthStore } from "@/src/store/customerAuthStore";
 import LoginDialog from "./loginDialog";
-
+import { useLocaleStore } from "@/src/store/localeStore";
+import { t } from "../../i18";
 interface BookButtonProps {
   serviceId: string;
   serviceName: string;
@@ -15,7 +16,7 @@ export default function BookButton({ serviceId, serviceName }: BookButtonProps) 
   const { isAuthenticated } = useCustomerAuthStore();
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
-
+  const { msgs } = useLocaleStore();
   const serviceUrl = `/customer/services/${serviceId}`;
 
   // ── Authenticated: original behaviour (plain Link kept below) ──────────────
@@ -30,7 +31,7 @@ export default function BookButton({ serviceId, serviceName }: BookButtonProps) 
           focus:outline-2 focus:outline-offset-2 focus:outline-blue-800
           transition-all"
       >
-        Book Now
+          {t(msgs, "services.bookNow")}
       </Link>
     );
   }
