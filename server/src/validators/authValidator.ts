@@ -40,8 +40,6 @@ export function validateLoginBody(
     res.status(400).json(body);
     return;
   }
-
-  // Replace req.body with validated + trimmed data (portal is now guaranteed present).
   req.body = result.data;
   next();
 }
